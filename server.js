@@ -28,6 +28,9 @@ app.use((req, res, next) => {
     next();
 });
 
+// Health check for Railway/Render
+app.get('/health', (req, res) => res.json({ status: 'ok', version: '4.8.0' }));
+
 // Serve draft public files first (admin.html, captain.html)
 app.use(express.static(path.join(__dirname, 'draft/public')));
 // Then main overlay public files
