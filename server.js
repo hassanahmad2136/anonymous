@@ -30,6 +30,8 @@ app.use((req, res, next) => {
 
 // Health check for Railway/Render
 app.get('/health', (req, res) => res.json({ status: 'ok', version: '4.8.0' }));
+// Root redirect → admin panel
+app.get('/', (req, res) => res.redirect('/admin.html'));
 
 // Serve draft public files first (admin.html, captain.html)
 app.use(express.static(path.join(__dirname, 'draft/public')));
