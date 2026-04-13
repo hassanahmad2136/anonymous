@@ -1,0 +1,37 @@
+services:
+  # Overlay Server (port 3000) — OBS browser sources point here
+  - type: web
+    name: anonymous-overlay
+    runtime: node
+    buildCommand: npm install
+    startCommand: node server.js
+    envVars:
+      - key: PORT
+        value: 3000
+      - key: NODE_ENV
+        value: production
+    disk:
+      name: overlay-data
+      mountPath: /opt/render/project/src/public/database
+      sizeGB: 1
+
+  # Draft + Admin Server (port 3001) — captains & admin panel
+  - type: web
+    name: anonymous-draft
+    runtime: node
+    buildCommand: npm install
+    startCommand: node draft/server.js
+    envVars:
+      - key: DRAFT_PORT
+        value: 10000
+      - key: NODE_ENV
+        value: production
+      - key: OVERLAY_URL
+        # Set this to your anonymous-overlay Render URL after first deploy
+        value: https://anonymous-overlay.onrender.com
+      - key: TIMER_DURATION
+        value: 60
+    disk:
+      name: draft-data
+      mountPath: /opt/render/project/src/draft
+      sizeGB: 1
