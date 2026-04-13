@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transition</title>
+    <style>
+        @font-face {
+            font-family: 'BigNoodle';
+            src: url('Assets/Font/big_noodle_titling.ttf') format('truetype');
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background: #050508;
+            width: 1920px;
+            height: 1080px;
+            overflow: hidden;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+
+        /* ===== BACKGROUND ===== */
+        .bg {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: radial-gradient(ellipse 60% 60% at 50% 50%, #0d0a18, #050508);
+        }
+
+        .noise {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            z-index: 1; opacity: 0.03; pointer-events: none;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+            background-size: 200px;
+        }
+
+        .bg-grid {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background-image:
+                linear-gradient(rgba(168,85,247,0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(168,85,247,0.02) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: gridMove 25s linear infinite;
+            z-index: 1;
+            mask-image: radial-gradient(ellipse 70% 70% at 50% 50%, black, transparent);
+        }
+
+        /* ===== WIPE CURTAINS ===== */
+        .curtain-left, .curtain-right {
+            position: fixed; top: 0; bottom: 0; width: 50%;
+            z-index: 50;
+            background: #050508;
+        }
+        .curtain-left { left: 0; transform-origin: left center; }
+        .curtain-right { right: 0; transform-origin: right center; }
+
+        /* Quick mode: curtains close then open */
+        body.mode-quick .curtain-left {
+            animation: curtainCloseLeft 0.5s ease-in forwards,
+                       curtainOpenLeft 0.5s ease-out 2s forwards;
+        }
+        body.mode-quick .curtain-right {
+            animation: curtainCloseRight 0.5s ease-in forwards,
+                       curtainOpenRight 0.5s ease-out 2s forwards;
+        }
+
+        /* Loop mode: curtains close and stay */
+        body.mode-loop .curtain-left {
+            animation: curtainCloseLeft 0.5s ease-in forwards;
+        }
+        body.mode-loop .curtain-right {
+            animation: curtainCloseRight 0.5s ease-in forwards;
+        }
+
+        @keyframes curtainCloseLeft { from { transform: translateX(-100%); } to { transform: translateX(0); } }
+        @keyframes curtainCloseRight { from { transform: translateX(100%); } to { transform: translateX(0); } }
+        @keyframes curtainOpenLeft { from { transform: translateX(0); } to { transform: translateX(-100%); } }
+        @keyframes curtainOpenRight { from { transform: translateX(0); } to { transform: translateX(100%); } }
+
+        /* ===== CENTER SEAM (removed) ===== */
+        .seam { display: none; }
+
+        /* ===== CENTER CONTENT ===== */
+        .center-content {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            z-index: 60; pointer-events: none;
+            opacity: 0;
+        }
+
+        body.mode-quick .center-content {
+            animation: contentIn 0.4s ease 0.6s forwards, contentOut 0.3s ease 1.9s forwards;
+        }
+        body.mode-loop .center-content {
+            animation: contentIn 0.4s ease 0.6s forwards;
+        }
+
+        @keyframes contentIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+        @keyframes contentOut { from { opacity: 1; transform: scale(1); } to { opacity: 0; transform: scale(1.05); } }
+
+        /* Organized by line */
+        .organized-by {
+            font-size: 0.7rem; letter-spacing: 5px;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.35);
+            margin-bottom: 6px;
+        }
+
+        /* Shapitos Gaming */
+        .shapitos {
+            font-family: 'BigNoodle', Impact, sans-serif;
+            font-size: 1.8rem; letter-spacing: 8px;
+            color: rgba(168,85,247,0.9);
+            text-shadow: 0 0 20px rgba(168,85,247,0.4);
+            text-transform: uppercase;
+            margin-bottom: 16px;
+        }
+
+        /* Divider lines */
+        .title-divider {
+            width: 200px; height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(168,85,247,0.5), transparent);
+            margin: 10px 0;
+        }
+
+        /* Title text */
+        .title-battle {
+            font-family: 'BigNoodle', Impact, sans-serif;
+            font-size: 3.5rem; letter-spacing: 12px;
+            color: #fff;
+            text-shadow: 0 0 30px rgba(168,85,247,0.4);
+            text-transform: uppercase;
+            line-height: 1;
+        }
+        .title-of {
+            font-family: 'BigNoodle', Impact, sans-serif;
+            font-size: 2rem; letter-spacing: 18px;
+            color: rgba(255,255,255,0.6);
+            text-transform: uppercase;
+            margin-top: -2px;
+        }
+        .title-souls {
+            font-family: 'BigNoodle', Impact, sans-serif;
+            font-size: 4.5rem; letter-spacing: 14px;
+            color: #c62828;
+            text-shadow: 0 0 30px rgba(198,40,40,0.5), 0 0 60px rgba(198,40,40,0.2);
+            text-transform: uppercase;
+            line-height: 1;
+            margin-top: -4px;
+        }
+
+        /* Tagline */
+        .title-divider-bottom {
+            width: 120px; height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(168,85,247,0.3), transparent);
+            margin-top: 14px;
+        }
+        .tagline {
+            font-size: 0.65rem; letter-spacing: 6px;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.3);
+            margin-top: 10px;
+        }
+
+        /* ===== HORIZONTAL SLASH PARTICLES ===== */
+        .slash-particles {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            z-index: 52; pointer-events: none; overflow: hidden;
+            opacity: 0;
+        }
+
+        body.mode-quick .slash-particles {
+            animation: slashIn 0.3s ease 0.35s forwards, slashOut 0.3s ease 2s forwards;
+        }
+        body.mode-loop .slash-particles {
+            animation: slashIn 0.3s ease 0.35s forwards;
+        }
+
+        @keyframes slashIn { to { opacity: 1; } }
+        @keyframes slashOut { to { opacity: 0; } }
+
+        .spark {
+            position: absolute; top: 50%; height: 2px;
+            border-radius: 2px;
+            animation: sparkFly linear forwards;
+        }
+
+        @keyframes sparkFly {
+            0% { transform: translateX(0) scaleX(1); opacity: 1; }
+            80% { opacity: 0.6; }
+            100% { opacity: 0; }
+        }
+
+        /* ===== AMBIENT PARTICLES (loop mode) ===== */
+        .ambient-particles {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            z-index: 58; pointer-events: none; overflow: hidden;
+            opacity: 0;
+        }
+
+        body.mode-loop .ambient-particles {
+            animation: fadeIn 1s ease 1s forwards;
+        }
+
+        @keyframes fadeIn { to { opacity: 1; } }
+
+        .float-particle {
+            position: absolute;
+            background: rgba(168,85,247,0.4);
+            border-radius: 50%;
+            animation: particleFloat linear infinite;
+        }
+
+        @keyframes particleFloat {
+            0% { transform: translateY(0) translateX(0); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-300px) translateX(40px); opacity: 0; }
+        }
+
+        /* ===== BREATHING GLOW (loop mode) ===== */
+        .breathing-glow {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            z-index: 56; pointer-events: none;
+            background: radial-gradient(ellipse 40% 40% at 50% 50%, rgba(168,85,247,0.06), transparent);
+            opacity: 0;
+        }
+        body.mode-loop .breathing-glow {
+            animation: fadeIn 1s ease 0.8s forwards, breathe 3s ease-in-out 1.8s infinite;
+        }
+
+        @keyframes breathe {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 1; }
+        }
+
+        /* ===== SHIMMER SWEEP (loop) ===== */
+        .shimmer-sweep {
+            position: fixed; top: 0; bottom: 0; width: 300px;
+            z-index: 59; pointer-events: none;
+            background: linear-gradient(90deg, transparent, rgba(168,85,247,0.04), rgba(255,255,255,0.02), rgba(168,85,247,0.04), transparent);
+            opacity: 0;
+        }
+        body.mode-loop .shimmer-sweep {
+            animation: fadeIn 0.5s ease 1.5s forwards, shimmerPass 4s ease-in-out 2s infinite;
+        }
+
+        @keyframes shimmerPass {
+            0% { left: -300px; }
+            100% { left: 2100px; }
+        }
+
+        /* ===== SCANLINE ===== */
+        .scanline {
+            position: fixed; top: -2px; left: 0; right: 0;
+            height: 1px; z-index: 57;
+            background: linear-gradient(90deg, transparent 15%, rgba(168,85,247,0.06) 50%, transparent 85%);
+            opacity: 0;
+        }
+        body.mode-loop .scanline {
+            animation: fadeIn 0.5s ease 1s forwards, scanDown 8s linear 1.5s infinite;
+        }
+
+        @keyframes scanDown {
+            from { top: -2px; } to { top: 1082px; }
+        }
+
+        @keyframes gridMove {
+            from { transform: translate(0, 0); }
+            to { transform: translate(50px, 50px); }
+        }
+
+        /* ===== CORNER BRACKETS (loop) ===== */
+        .bracket {
+            position: fixed; width: 40px; height: 40px;
+            z-index: 61; opacity: 0;
+        }
+        body.mode-loop .bracket { animation: bracketIn 0.5s ease 0.8s forwards; }
+        body.mode-quick .bracket { animation: bracketIn 0.3s ease 0.6s forwards, bracketOut 0.3s ease 1.9s forwards; }
+
+        .bracket::before, .bracket::after { content: ''; position: absolute; background: rgba(168,85,247,0.25); }
+        .bracket-tl { top: 35px; left: 35px; }
+        .bracket-tl::before { top: 0; left: 0; width: 20px; height: 1px; }
+        .bracket-tl::after { top: 0; left: 0; width: 1px; height: 20px; }
+        .bracket-tr { top: 35px; right: 35px; }
+        .bracket-tr::before { top: 0; right: 0; width: 20px; height: 1px; }
+        .bracket-tr::after { top: 0; right: 0; width: 1px; height: 20px; }
+        .bracket-bl { bottom: 35px; left: 35px; }
+        .bracket-bl::before { bottom: 0; left: 0; width: 20px; height: 1px; }
+        .bracket-bl::after { bottom: 0; left: 0; width: 1px; height: 20px; }
+        .bracket-br { bottom: 35px; right: 35px; }
+        .bracket-br::before { bottom: 0; right: 0; width: 20px; height: 1px; }
+        .bracket-br::after { bottom: 0; right: 0; width: 1px; height: 20px; }
+
+        @keyframes bracketIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes bracketOut { from { opacity: 1; } to { opacity: 0; } }
+    </style>
+</head>
+<body>
+    <!-- Background layers -->
+    <div class="bg"></div>
+    <div class="noise"></div>
+    <div class="bg-grid"></div>
+
+    <!-- Wipe curtains -->
+    <div class="curtain-left"></div>
+    <div class="curtain-right"></div>
+
+    <!-- Center seam glow -->
+    <div class="seam">
+        <div class="seam-glow"></div>
+        <div class="seam-line"></div>
+    </div>
+
+    <!-- Spark particles from seam -->
+    <div class="slash-particles" id="slashParticles"></div>
+
+    <!-- Breathing background glow -->
+    <div class="breathing-glow"></div>
+
+    <!-- Scanline -->
+    <div class="scanline"></div>
+
+    <!-- Shimmer sweep -->
+    <div class="shimmer-sweep"></div>
+
+    <!-- Ambient floating particles -->
+    <div class="ambient-particles" id="ambientParticles"></div>
+
+    <!-- Center branding -->
+    <div class="center-content">
+        <div class="organized-by">Organized By</div>
+        <div class="shapitos">Shapitos Gaming</div>
+        <div class="title-divider"></div>
+        <div class="title-battle">BATTLE</div>
+        <div class="title-of">OF</div>
+        <div class="title-souls">SOULS</div>
+        <div class="title-divider-bottom"></div>
+        <div class="tagline">Where Legends Rise</div>
+    </div>
+
+    <!-- Corner brackets -->
+    <div class="bracket bracket-tl"></div>
+    <div class="bracket bracket-tr"></div>
+    <div class="bracket bracket-bl"></div>
+    <div class="bracket bracket-br"></div>
+
+    <script>
+        // ===== MODE CONTROL =====
+        // ?mode=quick  -> plays ~2.5s then clears (use as OBS stinger/transition)
+        // ?mode=loop   -> stays on screen indefinitely (switch scene manually)
+        // Default: loop
+        const params = new URLSearchParams(window.location.search);
+        const mode = params.get('mode') || 'loop';
+        document.body.classList.add('mode-' + mode);
+
+        // ===== SPARK PARTICLES FROM CENTER SEAM =====
+        const slashContainer = document.getElementById('slashParticles');
+        for (let i = 0; i < 40; i++) {
+            const spark = document.createElement('div');
+            spark.className = 'spark';
+            const goLeft = Math.random() > 0.5;
+            const yOffset = (Math.random() - 0.5) * 400;
+            const width = 20 + Math.random() * 80;
+            const speed = 0.3 + Math.random() * 0.5;
+            const delay = Math.random() * 0.3;
+
+            spark.style.left = '50%';
+            spark.style.marginTop = yOffset + 'px';
+            spark.style.width = width + 'px';
+            spark.style.background = `linear-gradient(${goLeft ? '270deg' : '90deg'}, rgba(168,85,247,${0.4 + Math.random() * 0.4}), transparent)`;
+            spark.style.animationDuration = speed + 's';
+            spark.style.animationDelay = (0.35 + delay) + 's';
+            spark.style.transform = `translateX(${goLeft ? '-' : ''}${150 + Math.random() * 600}px)`;
+
+            // Set the end position via a unique animation
+            const dist = (goLeft ? -1 : 1) * (150 + Math.random() * 600);
+            spark.style.setProperty('--dist', dist + 'px');
+            spark.animate([
+                { transform: 'translateX(0) scaleX(1)', opacity: 1 },
+                { transform: `translateX(${dist}px) scaleX(0.3)`, opacity: 0 }
+            ], {
+                duration: speed * 1000,
+                delay: (0.35 + delay) * 1000,
+                easing: 'linear',
+                fill: 'forwards'
+            });
+
+            slashContainer.appendChild(spark);
+        }
+
+        // ===== AMBIENT FLOATING PARTICLES (for loop mode) =====
+        if (mode === 'loop') {
+            const ambientContainer = document.getElementById('ambientParticles');
+            for (let i = 0; i < 30; i++) {
+                const p = document.createElement('div');
+                p.className = 'float-particle';
+                const size = 1 + Math.random() * 3;
+                p.style.width = size + 'px';
+                p.style.height = size + 'px';
+                p.style.left = Math.random() * 100 + '%';
+                p.style.top = (50 + Math.random() * 50) + '%';
+                p.style.animationDuration = (4 + Math.random() * 6) + 's';
+                p.style.animationDelay = (Math.random() * 5) + 's';
+                ambientContainer.appendChild(p);
+            }
+        }
+
+        // ===== QUICK MODE: auto-hide after transition =====
+        if (mode === 'quick') {
+            // Total: 0.5s close + ~1.5s hold + 0.5s open = ~2.5s
+            // After animation completes, make body transparent for OBS
+            setTimeout(() => {
+                document.body.style.background = 'transparent';
+                document.querySelectorAll('.bg, .noise, .bg-grid').forEach(el => el.style.display = 'none');
+            }, 2800);
+        }
+    </script>
+</body>
+</html>

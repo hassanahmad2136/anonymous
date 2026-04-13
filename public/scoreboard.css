@@ -1,0 +1,152 @@
+@font-face {
+    font-family: 'myfonts';
+    src: url('Assets/Font/big_noodle_titling.ttf') format('truetype');
+
+  }
+
+  /* Menggunakan font di seluruh halaman */
+  body {
+    font-family: 'myfonts', sans-serif;
+
+    
+  }
+
+
+.scoreboard{
+    width: 1920px;
+    height: 1080px;
+    background-image: url(Assets/Other/scoreboard.png);
+}
+
+.upper{
+    width: 1920px;
+    height: 94px;
+    
+  
+    display: flex;
+}
+
+.lower{
+    width: 1920px;
+    height: 30px;
+
+    display: flex;
+}
+
+.mapbox{
+    width: 341.75px;
+    height: 100%;
+    
+}
+
+.gb1{
+    width:52.08px ;
+}
+
+.teamname{
+    width: 616px;
+    height: 100%;
+    align-items: center;
+    justify-content: center;
+    display: flex;
+    font-size: 30px;
+    color: #fff;
+
+    margin-top: -32px
+
+}
+
+.morelower{
+    width: 1920px;
+    height: 30px;
+    margin-top: 11px;
+   
+    display: flex;
+   
+}
+
+.morebox{
+    width: 822.5px;
+    height: 100%;
+    
+}
+
+.score{
+    width: 48px;
+    height: auto;
+    
+    color: #350066;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size:48px;
+
+
+}
+
+.tn{
+    width: 302px;
+    height: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 38px;
+    color: #fff;
+}
+
+.midmorebox{
+    width: 142.45px;
+    height: auto;
+  
+}
+
+.logo{
+    width: 114.67px;
+    height: 114.67px;
+  
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.logo img{
+    width: 95px;
+    height: 95px;
+    object-fit: contain;
+}
+
+.uppermid{
+    width: 906.61px;
+    height: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+   
+}
+
+.midscorename{
+    width: 86.61;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
+}
+
+.teamnamesc{
+    width: 350px;
+    height: 100%;
+    display: flex;
+    margin-top: -37px;
+}
+.gb2{
+    width: 166.61px;
+    height: 100%;
+}
+
+.hide{
+    width: 0px;
+    height: 0px;
+    opacity: 0;
+}

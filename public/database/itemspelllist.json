@@ -1,0 +1,587 @@
+[
+  {
+    "name": "Aegis",
+    "file": "Aegis.png",
+    "type": "spell"
+  },
+  {
+    "name": "Allow Throw",
+    "file": "Allow Throw.png",
+    "type": "item"
+  },
+  {
+    "name": "Antique Cuirass",
+    "file": "Antique Cuirass.png",
+    "type": "item"
+  },
+  {
+    "name": "Arcane Boots",
+    "file": "Arcane Boots.png",
+    "type": "item"
+  },
+  {
+    "name": "Ares Belt",
+    "file": "Ares Belt.png",
+    "type": "item"
+  },
+  {
+    "name": "Arrival",
+    "file": "Arrival.png",
+    "type": "spell"
+  },
+  {
+    "name": "Athenas Shield",
+    "file": "Athenas Shield.png",
+    "type": "item"
+  },
+  {
+    "name": "Azure Blade",
+    "file": "Azure Blade.png",
+    "type": "item"
+  },
+  {
+    "name": "Berserkers Fury",
+    "file": "Berserkers Fury.png",
+    "type": "item"
+  },
+  {
+    "name": "Black Ice Shield",
+    "file": "Black Ice Shield.png",
+    "type": "item"
+  },
+  {
+    "name": "Blade Armor",
+    "file": "Blade Armor.png",
+    "type": "item"
+  },
+  {
+    "name": "Blade Of Despair",
+    "file": "Blade Of Despair.png",
+    "type": "item"
+  },
+  {
+    "name": "Blade of the Heptaseas",
+    "file": "Blade of the Heptaseas.png",
+    "type": "item"
+  },
+  {
+    "name": "Blood Wings",
+    "file": "Blood Wings.png",
+    "type": "item"
+  },
+  {
+    "name": "Bloody_Retributio",
+    "file": "Bloody_Retributio.png",
+    "type": "spell"
+  },
+  {
+    "name": "Book of Sages",
+    "file": "Book of Sages.png",
+    "type": "item"
+  },
+  {
+    "name": "Boots",
+    "file": "Boots.png",
+    "type": "item"
+  },
+  {
+    "name": "Brute Force Breastplate",
+    "file": "Brute Force Breastplate.png",
+    "type": "item"
+  },
+  {
+    "name": "Chastise Pauldron",
+    "file": "Chastise Pauldron.png",
+    "type": "item"
+  },
+  {
+    "name": "Clock of Destiny",
+    "file": "Clock of Destiny.png",
+    "type": "item"
+  },
+  {
+    "name": "Conceal",
+    "file": "Conceal.png",
+    "type": "spell"
+  },
+  {
+    "name": "Concentrated Energy",
+    "file": "Concentrated Energy.png",
+    "type": "item"
+  },
+  {
+    "name": "Corrosion Scythe",
+    "file": "Corrosion Scythe.png",
+    "type": "item"
+  },
+  {
+    "name": "Cursed Helmet",
+    "file": "Cursed Helmet.png",
+    "type": "item"
+  },
+  {
+    "name": "Dagger",
+    "file": "Dagger.png",
+    "type": "item"
+  },
+  {
+    "name": "Demon Hunter Sword",
+    "file": "Demon Hunter Sword.png",
+    "type": "item"
+  },
+  {
+    "name": "Demon Shoes",
+    "file": "Demon Shoes.png",
+    "type": "item"
+  },
+  {
+    "name": "Dire Hit ",
+    "file": "Dire Hit .png",
+    "type": "item"
+  },
+  {
+    "name": "Divine Glaive",
+    "file": "Divine Glaive.png",
+    "type": "item"
+  },
+  {
+    "name": "Dominance Ice",
+    "file": "Dominance Ice.png",
+    "type": "item"
+  },
+  {
+    "name": "Dreadnaught Armor",
+    "file": "Dreadnaught Armor.png",
+    "type": "item"
+  },
+  {
+    "name": "Elegant Gem",
+    "file": "Elegant Gem.png",
+    "type": "item"
+  },
+  {
+    "name": "Enchanted Talisman",
+    "file": "Enchanted Talisman.png",
+    "type": "item"
+  },
+  {
+    "name": "Encourage",
+    "file": "Encourage.png",
+    "type": "spell"
+  },
+  {
+    "name": "Endless Battle",
+    "file": "Endless Battle.png",
+    "type": "item"
+  },
+  {
+    "name": "Execute",
+    "file": "Execute.png",
+    "type": "spell"
+  },
+  {
+    "name": "Exotic Veil",
+    "file": "Exotic Veil.png",
+    "type": "item"
+  },
+  {
+    "name": "Expert Gloves",
+    "file": "Expert Gloves.png",
+    "type": "item"
+  },
+  {
+    "name": "Favor",
+    "file": "Favor.png",
+    "type": "spell"
+  },
+  {
+    "name": "Feather of Heaven",
+    "file": "Feather of Heaven.png",
+    "type": "item"
+  },
+  {
+    "name": "Flame Retribution",
+    "file": "Flame Retribution.png",
+    "type": "spell"
+  },
+  {
+    "name": "Flameshot",
+    "file": "Flameshot.png",
+    "type": "spell"
+  },
+  {
+    "name": "Flask of the Oasis",
+    "file": "Flask of the Oasis.png",
+    "type": "item"
+  },
+  {
+    "name": "Fleeting Time",
+    "file": "Fleeting Time.png",
+    "type": "item"
+  },
+  {
+    "name": "Flicker",
+    "file": "Flicker.png",
+    "type": "spell"
+  },
+  {
+    "name": "Flower of Hope",
+    "file": "Flower of Hope.png",
+    "type": "item"
+  },
+  {
+    "name": "Fury Hammer",
+    "file": "Fury Hammer.png",
+    "type": "item"
+  },
+  {
+    "name": "Genius Wand",
+    "file": "Genius Wand.png",
+    "type": "item"
+  },
+  {
+    "name": "Glowing Wand",
+    "file": "Glowing Wand.png",
+    "type": "item"
+  },
+  {
+    "name": "Golden Staff",
+    "file": "Golden Staff.png",
+    "type": "item"
+  },
+  {
+    "name": "Great Dragon Spear",
+    "file": "Great Dragon Spear.png",
+    "type": "item"
+  },
+  {
+    "name": "Guardian Helmet",
+    "file": "Guardian Helmet.png",
+    "type": "item"
+  },
+  {
+    "name": "Haass Claws",
+    "file": "Haass Claws.png",
+    "type": "item"
+  },
+  {
+    "name": "Healing Necklace",
+    "file": "Healing Necklace.png",
+    "type": "item"
+  },
+  {
+    "name": "Heros Ring",
+    "file": "Heros Ring.png",
+    "type": "item"
+  },
+  {
+    "name": "Holy Crystal",
+    "file": "Holy Crystal.png",
+    "type": "item"
+  },
+  {
+    "name": "Hunter Strike",
+    "file": "Hunter Strike.png",
+    "type": "item"
+  },
+  {
+    "name": "Ice Queen Wand",
+    "file": "Ice Queen Wand.png",
+    "type": "item"
+  },
+  {
+    "name": "Ice Retribution",
+    "file": "Ice Retribution.png",
+    "type": "spell"
+  },
+  {
+    "name": "Immortality",
+    "file": "Immortality.png",
+    "type": "item"
+  },
+  {
+    "name": "Inspire",
+    "file": "Inspire.png",
+    "type": "spell"
+  },
+  {
+    "name": "Iron Hunting Bow",
+    "file": "Iron Hunting Bow.png",
+    "type": "item"
+  },
+  {
+    "name": "Javelin",
+    "file": "Javelin.png",
+    "type": "item"
+  },
+  {
+    "name": "Knife",
+    "file": "Knife.png",
+    "type": "item"
+  },
+  {
+    "name": "Lantern of Hope",
+    "file": "Lantern of Hope.png",
+    "type": "item"
+  },
+  {
+    "name": "Leather Jerkin",
+    "file": "Leather Jerkin.png",
+    "type": "item"
+  },
+  {
+    "name": "Legion Sword",
+    "file": "Legion Sword.png",
+    "type": "item"
+  },
+  {
+    "name": "Lightning Truncheon",
+    "file": "Lightning Truncheon.png",
+    "type": "item"
+  },
+  {
+    "name": "Magic Blade",
+    "file": "Magic Blade.png",
+    "type": "item"
+  },
+  {
+    "name": "Magic Necklace",
+    "file": "Magic Necklace.png",
+    "type": "item"
+  },
+  {
+    "name": "Magic Potion",
+    "file": "Magic Potion.png",
+    "type": "item"
+  },
+  {
+    "name": "Magic Resist Cloak",
+    "file": "Magic Resist Cloak.png",
+    "type": "item"
+  },
+  {
+    "name": "Magic Shoes",
+    "file": "Magic Shoes.png",
+    "type": "item"
+  },
+  {
+    "name": "Magic Wand",
+    "file": "Magic Wand.png",
+    "type": "item"
+  },
+  {
+    "name": "Malefic Gun",
+    "file": "Malefic Gun.png",
+    "type": "item"
+  },
+  {
+    "name": "Malefic Roar",
+    "file": "Malefic Roar.png",
+    "type": "item"
+  },
+  {
+    "name": "Molten Essence",
+    "file": "Molten Essence.png",
+    "type": "item"
+  },
+  {
+    "name": "Mystery Codex",
+    "file": "Mystery Codex.png",
+    "type": "item"
+  },
+  {
+    "name": "Mystic Container",
+    "file": "Mystic Container.png",
+    "type": "item"
+  },
+  {
+    "name": "Ogre Tomahawk",
+    "file": "Ogre Tomahawk.png",
+    "type": "item"
+  },
+  {
+    "name": "Oracle",
+    "file": "Oracle.png",
+    "type": "item"
+  },
+  {
+    "name": "Petrify",
+    "file": "Petrify.png",
+    "type": "spell"
+  },
+  {
+    "name": "Power Crystal",
+    "file": "Power Crystal.png",
+    "type": "item"
+  },
+  {
+    "name": "Power Potion",
+    "file": "Power Potion.png",
+    "type": "item"
+  },
+  {
+    "name": "Purify",
+    "file": "Purify.png",
+    "type": "spell"
+  },
+  {
+    "name": "Queens Wings",
+    "file": "Queens Wings.png",
+    "type": "item"
+  },
+  {
+    "name": "Radiant Armor",
+    "file": "Radiant Armor.png",
+    "type": "item"
+  },
+  {
+    "name": "Rapid Boots",
+    "file": "Rapid Boots.png",
+    "type": "item"
+  },
+  {
+    "name": "Regular Spear",
+    "file": "Regular Spear.png",
+    "type": "item"
+  },
+  {
+    "name": "Retribution",
+    "file": "Retribution.png",
+    "type": "spell"
+  },
+  {
+    "name": "Revitalize",
+    "file": "Revitalize.png",
+    "type": "spell"
+  },
+  {
+    "name": "Rock Potion",
+    "file": "Rock Potion.png",
+    "type": "item"
+  },
+  {
+    "name": "Rogue Meteor",
+    "file": "Rogue Meteor.png",
+    "type": "item"
+  },
+  {
+    "name": "Rose Gold Meteor",
+    "file": "Rose Gold Meteor.png",
+    "type": "item"
+  },
+  {
+    "name": "Sea Halberd",
+    "file": "Sea Halberd.png",
+    "type": "item"
+  },
+  {
+    "name": "Silence Robe",
+    "file": "Silence Robe.png",
+    "type": "item"
+  },
+  {
+    "name": "Sky Piercer",
+    "file": "Sky Piercer.png",
+    "type": "item"
+  },
+  {
+    "name": "Sprint",
+    "file": "Sprint.png",
+    "type": "spell"
+  },
+  {
+    "name": "Starlium Scythe",
+    "file": "Starlium Scythe.png",
+    "type": "item"
+  },
+  {
+    "name": "Steel Legplates",
+    "file": "Steel Legplates.png",
+    "type": "item"
+  },
+  {
+    "name": "Swift Boots",
+    "file": "Swift Boots.png",
+    "type": "item"
+  },
+  {
+    "name": "Swift Crossbow",
+    "file": "Swift Crossbow.png",
+    "type": "item"
+  },
+  {
+    "name": "Throw Forbidden",
+    "file": "Throw Forbidden.png",
+    "type": "item"
+  },
+  {
+    "name": "Thunder Belt",
+    "file": "Thunder Belt.png",
+    "type": "item"
+  },
+  {
+    "name": "Tome of Evil",
+    "file": "Tome of Evil.png",
+    "type": "item"
+  },
+  {
+    "name": "Tough Boots",
+    "file": "Tough Boots.png",
+    "type": "item"
+  },
+  {
+    "name": "Twilight Armor",
+    "file": "Twilight Armor.png",
+    "type": "item"
+  },
+  {
+    "name": "Vampire Mallet",
+    "file": "Vampire Mallet.png",
+    "type": "item"
+  },
+  {
+    "name": "Vengeance",
+    "file": "Vengeance.png",
+    "type": "spell"
+  },
+  {
+    "name": "Vitality Crystal",
+    "file": "Vitality Crystal.png",
+    "type": "item"
+  },
+  {
+    "name": "War Axe",
+    "file": "War Axe.png",
+    "type": "item"
+  },
+  {
+    "name": "Warrior Boots",
+    "file": "Warrior Boots.png",
+    "type": "item"
+  },
+  {
+    "name": "Wind of Nature",
+    "file": "Wind of Nature.png",
+    "type": "item"
+  },
+  {
+    "name": "Windtalker",
+    "file": "Windtalker.png",
+    "type": "item"
+  },
+  {
+    "name": "Winter Crown",
+    "file": "Winter Crown.png",
+    "type": "item"
+  },
+  {
+    "name": "Winter Truncheon",
+    "file": "Winter Truncheon.png",
+    "type": "item"
+  },
+  {
+    "name": "Wishing Lantern",
+    "file": "Wishing Lantern.png",
+    "type": "item"
+  }
+]

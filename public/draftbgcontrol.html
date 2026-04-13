@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Draft BG Control Panel</title>
+    <style>
+        @font-face {
+            font-family: 'Big Noodle Titling';
+            src: url('Assets/Font/big_noodle_titling.ttf') format('truetype');
+        }
+
+        :root {
+            --background-color: #0D0F12;
+            --card-color: #1A1C20;
+            --font-color: #EAEAEA;
+            --accent-color: #A855F7;
+            --accent-glow: rgba(168, 85, 247, 0.5);
+            --border-color: #3f3f46;
+            --blue-side-accent: #00AFFF;
+            --red-side-accent: #F94868;
+            --active-color: #00FF8C;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background-color: var(--background-color);
+            font-family: 'Segoe UI', sans-serif;
+            color: var(--font-color);
+            min-height: 100vh;
+            padding: 30px;
+        }
+
+        h1 {
+            font-family: 'Big Noodle Titling', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            text-align: center;
+            margin-bottom: 30px;
+            font-weight: normal;
+            font-size: 2.6rem;
+            text-shadow: 0 0 10px var(--accent-glow);
+        }
+
+        h2 {
+            font-family: 'Big Noodle Titling', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            font-weight: normal;
+            font-size: 1.6rem;
+            margin-bottom: 15px;
+            color: var(--accent-color);
+        }
+
+        .container {
+            max-width: 1350px;
+            margin: 0 auto;
+            transform: scale(1.15);
+            transform-origin: top center;
+            padding-bottom: 100px;
+        }
+
+        .section {
+            background: rgba(26, 28, 32, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 25px;
+        }
+
+        .row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        input[type="text"], input[type="number"] {
+            background: #27272A;
+            border: 1px solid var(--border-color);
+            color: var(--font-color);
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        input[type="text"]:focus, input[type="number"]:focus {
+            border-color: var(--accent-color);
+        }
+        input[type="number"] {
+            width: 70px;
+            text-align: center;
+        }
+
+        select {
+            background: #27272A;
+            border: 1px solid var(--border-color);
+            color: var(--font-color);
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .sponsor-row input.name { flex: 2; }
+        .sponsor-row input.amount { flex: 1; }
+
+        button {
+            padding: 12px 22px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: 'Segoe UI', sans-serif;
+            font-size: 15px;
+            font-weight: 600;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-add {
+            background: var(--accent-color);
+            color: white;
+        }
+        .btn-add:hover { background: #9333ea; }
+
+        .btn-remove {
+            background: #dc2626;
+            color: white;
+            padding: 10px 14px;
+        }
+        .btn-remove:hover { background: #b91c1c; }
+
+        .btn-save {
+            background: var(--active-color);
+            color: #0D0F12;
+            padding: 14px 40px;
+            font-size: 15px;
+            width: 100%;
+            margin-top: 10px;
+        }
+        .btn-save:hover { background: #00e07a; }
+
+        .btn-secondary {
+            background: #3f3f46;
+            color: var(--font-color);
+        }
+        .btn-secondary:hover { background: #52525b; }
+
+        .status {
+            text-align: center;
+            margin-top: 10px;
+            font-size: 13px;
+            color: var(--active-color);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .status.show { opacity: 1; }
+
+        /* Caster rows */
+        .caster-row input { flex: 1; }
+
+        /* Player rows */
+        .player-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .player-row input.pname { flex: 1.5; }
+        .player-row .hero-select-wrap { flex: 1.5; position: relative; }
+
+        .hero-search {
+            width: 100%;
+            background: #27272A;
+            border: 1px solid var(--border-color);
+            color: var(--font-color);
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 16px;
+            outline: none;
+        }
+        .hero-search:focus { border-color: var(--accent-color); }
+
+        .hero-dropdown {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            max-height: 200px;
+            overflow-y: auto;
+            background: #27272A;
+            border: 1px solid var(--border-color);
+            border-radius: 0 0 8px 8px;
+            z-index: 100;
+        }
+        .hero-dropdown.open { display: block; }
+
+        .hero-option {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 12px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: background 0.15s;
+        }
+        .hero-option:hover { background: rgba(168,85,247,0.2); }
+
+        .hero-option img {
+            width: 30px;
+            height: 30px;
+            border-radius: 6px;
+            object-fit: cover;
+        }
+
+        .team-label {
+            font-family: 'Big Noodle Titling', sans-serif;
+            letter-spacing: 3px;
+            font-size: 1rem;
+            margin-bottom: 10px;
+            padding: 6px 14px;
+            border-radius: 6px;
+            display: inline-block;
+        }
+        .team-label.blue { background: rgba(0,175,255,0.15); color: var(--blue-side-accent); }
+        .team-label.red { background: rgba(249,72,104,0.15); color: var(--red-side-accent); }
+
+        .player-num {
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(168,85,247,0.15);
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: bold;
+            color: var(--accent-color);
+            flex-shrink: 0;
+        }
+
+        /* Group stage */
+        .group-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        .group-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+        .group-tab {
+            padding: 8px 20px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: transparent;
+            color: var(--font-color);
+            cursor: pointer;
+            font-size: 13px;
+            letter-spacing: 1px;
+        }
+        .group-tab.active {
+            background: var(--accent-color);
+            color: white;
+            border-color: var(--accent-color);
+        }
+
+        .group-team-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .group-team-row input.tname { flex: 2; }
+        .group-team-row input[type="number"] { width: 65px; }
+        .group-team-row label {
+            font-size: 11px;
+            letter-spacing: 1px;
+            color: rgba(255,255,255,0.4);
+            text-transform: uppercase;
+        }
+        .group-field {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            align-items: center;
+        }
+        .group-field label {
+            font-size: 10px;
+        }
+
+        .active-group-select {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 15px;
+            padding: 12px 16px;
+            background: rgba(168,85,247,0.08);
+            border-radius: 8px;
+            border: 1px solid rgba(168,85,247,0.15);
+        }
+        .active-group-select label {
+            font-size: 13px;
+            letter-spacing: 1px;
+            color: rgba(255,255,255,0.6);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Draft Background Control</h1>
+
+        <!-- Game Number & Previous Draft Section -->
+        <div class="section">
+            <h2>Match Settings</h2>
+            <div class="row" style="align-items:center;gap:15px;">
+                <label style="font-size:14px;color:rgba(255,255,255,0.6);letter-spacing:1px;">Game Number:</label>
+                <select id="game-number-select" onchange="updateGameNumber(this.value)" style="background:#27272A;border:1px solid var(--border-color);color:var(--font-color);padding:10px 20px;border-radius:8px;font-size:16px;font-weight:bold;">
+                    <option value="1">Game 1</option>
+                    <option value="2">Game 2</option>
+                    <option value="3">Game 3</option>
+                    <option value="4">Game 4</option>
+                    <option value="5">Game 5</option>
+                </select>
+                <span id="game-note" style="font-size:11px;color:rgba(255,255,255,0.3);letter-spacing:1px;">(Previous draft panels show on Game 2+)</span>
+            </div>
+        </div>
+
+        <!-- Previous Draft Editor -->
+        <div class="section" id="prev-draft-section">
+            <h2>Previous Draft (Game 1 Heroes)</h2>
+            <p style="font-size:12px;color:rgba(255,255,255,0.35);margin-bottom:15px;letter-spacing:0.5px;">Edit if auto-archive got something wrong. These show on the side panels during Game 2+.</p>
+
+            <div class="team-label blue">Blue Side - Picks</div>
+            <div id="prev-blue-picks" style="margin-bottom:12px;"></div>
+
+            <div class="team-label blue" style="margin-top:8px;">Blue Side - Bans</div>
+            <div id="prev-blue-bans" style="margin-bottom:15px;"></div>
+
+            <div class="team-label red">Red Side - Picks</div>
+            <div id="prev-red-picks" style="margin-bottom:12px;"></div>
+
+            <div class="team-label red" style="margin-top:8px;">Red Side - Bans</div>
+            <div id="prev-red-bans" style="margin-bottom:10px;"></div>
+
+            <button class="btn-save" onclick="savePrevDraft()" style="background:#A855F7;color:white;margin-top:5px;">Save Previous Draft</button>
+            <div class="status" id="prev-status">Previous draft saved!</div>
+        </div>
+
+        <!-- Casters Section -->
+        <div class="section">
+            <h2>Casters</h2>
+            <div id="caster-list"></div>
+            <button class="btn-add" onclick="addCaster()">+ Add Caster</button>
+        </div>
+
+        <!-- Sponsors Section -->
+        <div class="section">
+            <h2>Sponsors</h2>
+            <div id="sponsor-list"></div>
+            <button class="btn-add" onclick="addSponsor()">+ Add Sponsor</button>
+        </div>
+
+        <!-- Group Stage Section -->
+        <div class="section">
+            <h2>Group Stage</h2>
+
+            <div class="group-tabs" id="group-tabs"></div>
+            <button class="btn-add" onclick="addGroup()" style="margin-bottom:15px;">+ Add Group</button>
+
+            <div id="group-content"></div>
+
+            <div class="active-group-select">
+                <label>Show on stream:</label>
+                <select id="active-group-select" onchange="bgData.activeGroup = parseInt(this.value)"></select>
+            </div>
+        </div>
+
+        <!-- Players Section -->
+        <div class="section">
+            <h2>Players - Most Played Heroes</h2>
+            <div class="team-label blue">Blue Side</div>
+            <div id="blue-players"></div>
+
+            <div style="margin-top: 20px;">
+                <div class="team-label red">Red Side</div>
+                <div id="red-players"></div>
+            </div>
+        </div>
+
+        <!-- Save -->
+        <button class="btn-save" onclick="saveAll()">Save & Apply</button>
+        <div class="status" id="status">Saved successfully!</div>
+    </div>
+
+    <script>
+        let heroList = [];
+        let bgData = {
+            casters: [],
+            sponsors: [],
+            groups: [],
+            activeGroup: 0,
+            bluePlayers: [],
+            redPlayers: []
+        };
+        let selectedGroupTab = 0;
+        let prevDraftData = null;
+        let matchData = null;
+
+        async function loadHeroes() {
+            try {
+                const res = await fetch('/database/herolist.json');
+                heroList = await res.json();
+            } catch (e) { console.error('Error loading heroes:', e); }
+        }
+
+        async function loadData() {
+            try {
+                const res = await fetch('/api/draftbgdata');
+                bgData = await res.json();
+                if (!bgData.casters) bgData.casters = [];
+                if (!bgData.groups) bgData.groups = [];
+                if (bgData.activeGroup === undefined) bgData.activeGroup = 0;
+            } catch (e) { console.error('Error loading data:', e); }
+        }
+
+        // ===== GAME NUMBER =====
+        async function loadMatchData() {
+            try {
+                const res = await fetch('/api/matchdata');
+                matchData = await res.json();
+                const gameNum = parseInt(matchData.game_number) || 1;
+                document.getElementById('game-number-select').value = gameNum;
+            } catch (e) { console.error('Error loading match data:', e); }
+        }
+
+        async function updateGameNumber(val) {
+            try {
+                if (!matchData) matchData = {};
+                matchData.game_number = val;
+                await fetch('/api/matchdata', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(matchData)
+                });
+            } catch (e) { console.error('Error updating game number:', e); }
+        }
+
+        // ===== PREVIOUS DRAFT =====
+        async function loadPrevDraft() {
+            try {
+                const res = await fetch('/api/previousdraft');
+                prevDraftData = await res.json();
+                if (!prevDraftData.draftdata) {
+                    prevDraftData = {
+                        draftdata: {
+                            blueside: { pick: [{},{},{},{},{}], ban: [{},{},{},{},{}] },
+                            redside: { pick: [{},{},{},{},{}], ban: [{},{},{},{},{}] }
+                        }
+                    };
+                }
+                // Ensure arrays are full 5
+                const pd = prevDraftData.draftdata;
+                ['blueside','redside'].forEach(side => {
+                    ['pick','ban'].forEach(type => {
+                        if (!pd[side][type]) pd[side][type] = [];
+                        while (pd[side][type].length < 5) pd[side][type].push({ hero: '' });
+                    });
+                });
+            } catch (e) { console.error('Error loading prev draft:', e); }
+        }
+
+        function renderPrevDraft() {
+            if (!prevDraftData || !prevDraftData.draftdata) return;
+            const pd = prevDraftData.draftdata;
+
+            renderPrevDraftRow('prev-blue-picks', pd.blueside.pick, 'blueside', 'pick');
+            renderPrevDraftRow('prev-blue-bans', pd.blueside.ban, 'blueside', 'ban');
+            renderPrevDraftRow('prev-red-picks', pd.redside.pick, 'redside', 'pick');
+            renderPrevDraftRow('prev-red-bans', pd.redside.ban, 'redside', 'ban');
+        }
+
+        function renderPrevDraftRow(containerId, heroes, side, type) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+
+            heroes.forEach((h, i) => {
+                const heroName = getHeroNameFromPath(h.hero);
+                const row = document.createElement('div');
+                row.className = 'player-row';
+                row.innerHTML = `
+                    <div class="player-num" style="width:24px;height:24px;font-size:11px;">${i + 1}</div>
+                    <div class="hero-select-wrap" style="flex:1;">
+                        <input type="text" class="hero-search" placeholder="${type === 'pick' ? 'Pick' : 'Ban'} ${i+1}" value="${heroName}"
+                            onfocus="openPrevDropdown(this, '${side}', '${type}', ${i})"
+                            oninput="filterPrevHeroes(this, '${side}', '${type}', ${i})">
+                        <div class="hero-dropdown"></div>
+                    </div>
+                    <button class="btn-remove" style="padding:6px 10px;font-size:11px;" onclick="clearPrevHero('${side}','${type}',${i})">X</button>
+                `;
+                container.appendChild(row);
+            });
+        }
+
+        function openPrevDropdown(input, side, type, idx) {
+            closeAllDropdowns();
+            const dropdown = input.nextElementSibling;
+            populatePrevDropdown(dropdown, '', side, type, idx);
+            dropdown.classList.add('open');
+        }
+
+        function filterPrevHeroes(input, side, type, idx) {
+            const dropdown = input.nextElementSibling;
+            populatePrevDropdown(dropdown, input.value, side, type, idx);
+            dropdown.classList.add('open');
+        }
+
+        function populatePrevDropdown(dropdown, filter, side, type, idx) {
+            dropdown.innerHTML = '';
+            const filtered = heroList.filter(h => h.name.toLowerCase().includes(filter.toLowerCase())).slice(0, 20);
+            filtered.forEach(hero => {
+                const opt = document.createElement('div');
+                opt.className = 'hero-option';
+                opt.innerHTML = `<img src="${hero.img}" alt=""><span>${hero.name}</span>`;
+                opt.onclick = () => {
+                    prevDraftData.draftdata[side][type][idx].hero = hero.img;
+                    const input = dropdown.previousElementSibling;
+                    input.value = hero.name;
+                    dropdown.classList.remove('open');
+                };
+                dropdown.appendChild(opt);
+            });
+        }
+
+        function clearPrevHero(side, type, idx) {
+            prevDraftData.draftdata[side][type][idx].hero = '';
+            renderPrevDraft();
+        }
+
+        async function savePrevDraft() {
+            try {
+                // Save to previousmatchdraft.json via the archive endpoint workaround:
+                // First save as current draft, then archive, then restore current
+                // OR we can post directly. Let's use a direct approach.
+                const res = await fetch('/api/previousdraft', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(prevDraftData)
+                });
+                // The server might not have a POST for previousdraft, so let's handle that
+                if (!res.ok) {
+                    // Fallback: write via matchdraft then archive
+                    throw new Error('Direct save not available');
+                }
+                const result = await res.json();
+                showStatus('prev-status', result.message || 'Previous draft saved!');
+            } catch (e) {
+                // Try alternative: save directly by overwriting the archive
+                try {
+                    await fetch('/api/matchdraft', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(prevDraftData)
+                    });
+                    await fetch('/api/archive-draft', { method: 'POST' });
+                    showStatus('prev-status', 'Previous draft saved (via archive)!');
+                } catch (e2) {
+                    console.error('Save prev draft error:', e2);
+                }
+            }
+        }
+
+        function showStatus(id, msg) {
+            const el = document.getElementById(id);
+            el.textContent = msg;
+            el.classList.add('show');
+            setTimeout(() => el.classList.remove('show'), 2000);
+        }
+
+        // ===== CASTERS =====
+        function renderCasters() {
+            const container = document.getElementById('caster-list');
+            container.innerHTML = '';
+            bgData.casters.forEach((name, i) => {
+                const row = document.createElement('div');
+                row.className = 'row caster-row';
+                row.innerHTML = `
+                    <input type="text" placeholder="Caster Name" value="${name || ''}" oninput="bgData.casters[${i}] = this.value">
+                    <button class="btn-remove" onclick="removeCaster(${i})">X</button>
+                `;
+                container.appendChild(row);
+            });
+        }
+
+        function addCaster() {
+            bgData.casters.push('');
+            renderCasters();
+        }
+
+        function removeCaster(i) {
+            bgData.casters.splice(i, 1);
+            renderCasters();
+        }
+
+        // ===== SPONSORS =====
+        function renderSponsors() {
+            const container = document.getElementById('sponsor-list');
+            container.innerHTML = '';
+            bgData.sponsors.forEach((s, i) => {
+                const row = document.createElement('div');
+                row.className = 'row sponsor-row';
+                row.innerHTML = `
+                    <input type="text" class="name" placeholder="Sponsor Name" value="${s.name || ''}" oninput="bgData.sponsors[${i}].name = this.value">
+                    <input type="text" class="amount" placeholder="Amount (e.g. Pkr 5000)" value="${s.amount || ''}" oninput="bgData.sponsors[${i}].amount = this.value">
+                    <button class="btn-remove" onclick="removeSponsor(${i})">X</button>
+                `;
+                container.appendChild(row);
+            });
+        }
+
+        function addSponsor() {
+            bgData.sponsors.push({ name: '', amount: '' });
+            renderSponsors();
+        }
+
+        function removeSponsor(i) {
+            bgData.sponsors.splice(i, 1);
+            renderSponsors();
+        }
+
+        // ===== GROUP STAGE =====
+        function renderGroups() {
+            renderGroupTabs();
+            renderGroupContent();
+            renderActiveGroupSelect();
+        }
+
+        function renderGroupTabs() {
+            const container = document.getElementById('group-tabs');
+            container.innerHTML = '';
+            bgData.groups.forEach((g, i) => {
+                const btn = document.createElement('button');
+                btn.className = 'group-tab' + (i === selectedGroupTab ? ' active' : '');
+                btn.textContent = g.name || 'Group ' + (i + 1);
+                btn.onclick = () => { selectedGroupTab = i; renderGroups(); };
+                container.appendChild(btn);
+            });
+        }
+
+        function renderGroupContent() {
+            const container = document.getElementById('group-content');
+            container.innerHTML = '';
+            if (bgData.groups.length === 0) {
+                container.innerHTML = '<p style="color:rgba(255,255,255,0.3);font-size:13px;">No groups yet. Click "+ Add Group" to create one.</p>';
+                return;
+            }
+
+            const g = bgData.groups[selectedGroupTab];
+            if (!g) return;
+
+            // Group name input
+            const nameRow = document.createElement('div');
+            nameRow.className = 'row';
+            nameRow.innerHTML = `
+                <input type="text" style="flex:1" placeholder="Group Name (e.g. Group A)" value="${g.name || ''}" oninput="bgData.groups[${selectedGroupTab}].name = this.value; renderGroupTabs();">
+                <button class="btn-remove" onclick="removeGroup(${selectedGroupTab})">Delete Group</button>
+            `;
+            container.appendChild(nameRow);
+
+            // Team rows
+            const teamsDiv = document.createElement('div');
+            teamsDiv.style.marginTop = '12px';
+
+            (g.teams || []).forEach((t, ti) => {
+                const row = document.createElement('div');
+                row.className = 'group-team-row';
+                row.innerHTML = `
+                    <div class="player-num">${ti + 1}</div>
+                    <input type="text" class="tname" placeholder="Team Name" value="${t.name || ''}" oninput="bgData.groups[${selectedGroupTab}].teams[${ti}].name = this.value">
+                    <div class="group-field">
+                        <label>Wins</label>
+                        <input type="number" min="0" value="${t.wins || 0}" oninput="bgData.groups[${selectedGroupTab}].teams[${ti}].wins = parseInt(this.value) || 0">
+                    </div>
+                    <div class="group-field">
+                        <label>Losses</label>
+                        <input type="number" min="0" value="${t.losses || 0}" oninput="bgData.groups[${selectedGroupTab}].teams[${ti}].losses = parseInt(this.value) || 0">
+                    </div>
+                    <div class="group-field">
+                        <label>Points</label>
+                        <input type="number" min="0" value="${t.points || 0}" oninput="bgData.groups[${selectedGroupTab}].teams[${ti}].points = parseInt(this.value) || 0">
+                    </div>
+                    <button class="btn-remove" onclick="removeTeamFromGroup(${selectedGroupTab}, ${ti})">X</button>
+                `;
+                teamsDiv.appendChild(row);
+            });
+
+            container.appendChild(teamsDiv);
+
+            const addBtn = document.createElement('button');
+            addBtn.className = 'btn-add';
+            addBtn.textContent = '+ Add Team';
+            addBtn.style.marginTop = '8px';
+            addBtn.onclick = () => {
+                bgData.groups[selectedGroupTab].teams.push({ name: '', wins: 0, losses: 0, points: 0 });
+                renderGroupContent();
+            };
+            container.appendChild(addBtn);
+        }
+
+        function renderActiveGroupSelect() {
+            const select = document.getElementById('active-group-select');
+            select.innerHTML = '';
+            bgData.groups.forEach((g, i) => {
+                const opt = document.createElement('option');
+                opt.value = i;
+                opt.textContent = g.name || 'Group ' + (i + 1);
+                if (i === bgData.activeGroup) opt.selected = true;
+                select.appendChild(opt);
+            });
+        }
+
+        function addGroup() {
+            bgData.groups.push({
+                name: 'Group ' + String.fromCharCode(65 + bgData.groups.length),
+                teams: [
+                    { name: '', wins: 0, losses: 0, points: 0 },
+                    { name: '', wins: 0, losses: 0, points: 0 },
+                    { name: '', wins: 0, losses: 0, points: 0 },
+                    { name: '', wins: 0, losses: 0, points: 0 }
+                ]
+            });
+            selectedGroupTab = bgData.groups.length - 1;
+            renderGroups();
+        }
+
+        function removeGroup(i) {
+            bgData.groups.splice(i, 1);
+            if (selectedGroupTab >= bgData.groups.length) selectedGroupTab = Math.max(0, bgData.groups.length - 1);
+            if (bgData.activeGroup >= bgData.groups.length) bgData.activeGroup = Math.max(0, bgData.groups.length - 1);
+            renderGroups();
+        }
+
+        function removeTeamFromGroup(gi, ti) {
+            bgData.groups[gi].teams.splice(ti, 1);
+            renderGroupContent();
+        }
+
+        // ===== PLAYERS =====
+        function renderPlayers() {
+            renderTeamPlayers('blue-players', bgData.bluePlayers, 'bluePlayers');
+            renderTeamPlayers('red-players', bgData.redPlayers, 'redPlayers');
+        }
+
+        function renderTeamPlayers(containerId, players, dataKey) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+            players.forEach((p, i) => {
+                const hero1Name = getHeroNameFromPath(p.hero1);
+                const hero2Name = getHeroNameFromPath(p.hero2);
+
+                const row = document.createElement('div');
+                row.className = 'player-row';
+                row.innerHTML = `
+                    <div class="player-num">${i + 1}</div>
+                    <input type="text" class="pname" placeholder="Player Name" value="${p.name || ''}" oninput="bgData.${dataKey}[${i}].name = this.value">
+                    <div class="hero-select-wrap">
+                        <input type="text" class="hero-search" placeholder="Hero 1" value="${hero1Name}"
+                            onfocus="openDropdown(this, '${dataKey}', ${i}, 'hero1')"
+                            oninput="filterHeroes(this, '${dataKey}', ${i}, 'hero1')">
+                        <div class="hero-dropdown"></div>
+                    </div>
+                    <div class="hero-select-wrap">
+                        <input type="text" class="hero-search" placeholder="Hero 2" value="${hero2Name}"
+                            onfocus="openDropdown(this, '${dataKey}', ${i}, 'hero2')"
+                            oninput="filterHeroes(this, '${dataKey}', ${i}, 'hero2')">
+                        <div class="hero-dropdown"></div>
+                    </div>
+                `;
+                container.appendChild(row);
+            });
+        }
+
+        function getHeroNameFromPath(imgPath) {
+            if (!imgPath || !heroList.length) return '';
+            const hero = heroList.find(h => h.img === imgPath);
+            return hero ? hero.name : '';
+        }
+
+        function openDropdown(input, dataKey, playerIdx, heroField) {
+            closeAllDropdowns();
+            const dropdown = input.nextElementSibling;
+            populateDropdown(dropdown, '', dataKey, playerIdx, heroField);
+            dropdown.classList.add('open');
+        }
+
+        function filterHeroes(input, dataKey, playerIdx, heroField) {
+            const dropdown = input.nextElementSibling;
+            populateDropdown(dropdown, input.value, dataKey, playerIdx, heroField);
+            dropdown.classList.add('open');
+        }
+
+        function populateDropdown(dropdown, filter, dataKey, playerIdx, heroField) {
+            dropdown.innerHTML = '';
+            const filtered = heroList.filter(h => h.name.toLowerCase().includes(filter.toLowerCase())).slice(0, 20);
+            filtered.forEach(hero => {
+                const opt = document.createElement('div');
+                opt.className = 'hero-option';
+                opt.innerHTML = `<img src="${hero.img}" alt=""><span>${hero.name}</span>`;
+                opt.onclick = () => {
+                    bgData[dataKey][playerIdx][heroField] = hero.img;
+                    const input = dropdown.previousElementSibling;
+                    input.value = hero.name;
+                    dropdown.classList.remove('open');
+                };
+                dropdown.appendChild(opt);
+            });
+        }
+
+        function closeAllDropdowns() {
+            document.querySelectorAll('.hero-dropdown').forEach(d => d.classList.remove('open'));
+        }
+
+        document.addEventListener('click', (e) => {
+            if (!e.target.classList.contains('hero-search')) {
+                closeAllDropdowns();
+            }
+        });
+
+        // ===== SAVE =====
+        async function saveAll() {
+            try {
+                const res = await fetch('/api/draftbgdata', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(bgData)
+                });
+                const result = await res.json();
+                const status = document.getElementById('status');
+                status.textContent = result.message || 'Saved successfully!';
+                status.classList.add('show');
+                setTimeout(() => status.classList.remove('show'), 2000);
+            } catch (e) {
+                console.error('Save error:', e);
+            }
+        }
+
+        // ===== INIT =====
+        async function init() {
+            await loadHeroes();
+            await Promise.all([loadData(), loadMatchData(), loadPrevDraft()]);
+            renderCasters();
+            renderSponsors();
+            renderGroups();
+            renderPlayers();
+            renderPrevDraft();
+        }
+        init();
+    </script>
+</body>
+</html>

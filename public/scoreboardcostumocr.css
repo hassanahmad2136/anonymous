@@ -1,0 +1,333 @@
+@font-face {
+    font-family: 'myfonts';
+    src: url('Assets/Font/Renegade\ Pursuit.otf') format('truetype');
+}
+
+/* === VARIABEL SCOREBOARD === */
+:root {
+    /* Main Variables (Fallback) */
+    --blue-primary: #00d2ff; 
+    --red-primary: #ff2a2a;
+    
+    /* Scoreboard Specific (Diisi oleh theme-loader.js) */
+    --sb-teamname-blue: var(--blue-primary);
+    --sb-teamname-red: var(--red-primary);
+    
+    --sb-bg-teamname: #1e1e1e;
+    --sb-bg-logo: #000000;
+    --sb-bg-score: #000000;
+    --sb-bg-combined: #0a0a0a; /* Box 2 & Lower */
+    --sb-bg-box1: #1e1e1e;
+    --sb-bg-secondary: #1e1e1e;
+    
+    --sb-border-bottom: rgba(255, 255, 255, 0.2);
+    --sb-flag-img: none;
+    
+    /* Scoreboard Toggles */
+    --sb-glow-blue: 0 0 10px var(--sb-teamname-blue);
+    --sb-glow-red: 0 0 10px var(--sb-teamname-red);
+    --sb-box-shadow-blue: 0 0 10px rgba(0, 210, 255, 0.2);
+    --sb-box-shadow-red: 0 0 10px rgba(255, 42, 42, 0.2);
+
+    /* Timer */
+    --timer-mid: #ffffff;
+}
+
+body {
+    font-family: myfonts;
+    color: #fff;
+    margin: 0;
+    padding: 0;
+}
+
+.mainbox {
+    width: 1920px;
+    height: 1080px;
+    display: flex;
+}
+
+.map {
+    width: 337.5px;
+    height: 337.5px;
+}
+
+.board {
+    width: 1581.5px;
+    height: 126.5px;
+    display: flex;
+}
+
+/* --- BOX 1 & FLAG --- */
+.box1 {
+    width: 104px;
+    height: 119.5px;
+    background: var(--sb-bg-box1);
+}
+
+.flag {
+    width: 104px;
+    height: 119px;
+    background-position: center;
+    background-size: 80%;
+    background-repeat: no-repeat;
+    background-image: var(--sb-flag-img);
+}
+
+/* --- MAIN SCOREBOARD --- */
+.mainscoreboard {
+    width: 1037.07px;
+    height: 119.5px;
+    display: flex;
+    flex-direction: column;
+}
+
+.upper {
+    width: 1037.07px;
+    height: 52.63px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    position: relative;
+}
+
+/* --- BOX 2 --- */
+.box2 {
+    width: 91px;
+    height: 52.63px;
+    padding: 10px;
+    position: absolute;
+    background: var(--sb-bg-combined); 
+    border-bottom: 1px solid var(--sb-border-bottom);
+}
+
+.box2.blue {
+    border-top: 4px solid var(--blue-primary);
+}
+
+.box2.red {
+    border-top: 4px solid var(--red-primary);
+}
+
+.mb { left: -10px; }
+.mr { right: -10px; }
+
+.transparent {
+    width: 1055.07px;
+    height: 52.63px;
+    background: var(--sb-bg-combined); 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    z-index: 1;
+}
+
+.transparentwrap{
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.killscore{
+    width: 80px;
+    height: 52px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    object-fit: contain;
+    font-size: 35px;
+}
+
+.value{
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    object-fit: contain;
+    font-size: 25px;
+}
+
+.goldvalue{
+    width: 100px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    object-fit: contain;
+    font-size: 25px;
+}
+
+.timer{
+    width: 200px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    object-fit: contain;
+    font-size: 35px;
+    color: var(--timer-mid);
+    text-shadow: 0 0 8px rgba(255, 255, 255, 0.4); 
+}
+
+/* --- ICONS (MASKING TECHNIQUE) --- */
+.tlt {
+    width: 37px;
+    height: 52px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.tlt .icon {
+    width: 100%;
+    height: 100%;
+    -webkit-mask-size: contain;
+    -webkit-mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    mask-size: contain;
+    mask-repeat: no-repeat;
+    mask-position: center;
+}
+
+.icon-lord {
+    -webkit-mask-image: url('Assets/Other/lord.png');
+    mask-image: url('Assets/Other/lord.png');
+}
+.icon-tower {
+    -webkit-mask-image: url('Assets/Other/tower.png');
+    mask-image: url('Assets/Other/tower.png');
+}
+.icon-gold {
+    -webkit-mask-image: url('Assets/Other/gold.png');
+    mask-image: url('Assets/Other/gold.png');
+}
+
+/* --- TEXT & ICON COLORS (BLUE SIDE) --- */
+.blue-side {
+    color: var(--sb-teamname-blue);
+    text-shadow: var(--sb-glow-blue);
+}
+.blue-side .icon {
+    background-color: var(--sb-teamname-blue);
+    filter: drop-shadow(0 0 5px var(--sb-teamname-blue)); 
+}
+
+/* --- TEXT & ICON COLORS (RED SIDE) --- */
+.red-side {
+    color: var(--sb-teamname-red);
+    text-shadow: var(--sb-glow-red);
+}
+.red-side .icon {
+    background-color: var(--sb-teamname-red);
+    filter: drop-shadow(0 0 5px var(--sb-teamname-red));
+}
+
+/* --- LOWER BAR --- */
+.lower {
+    width: 1037.07px;
+    height: 39.87px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--sb-bg-combined); 
+}
+
+.lowerwrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.red { transform: skewX(-20deg); }
+.blue { transform: skewX(20deg); }
+
+/* --- SCORE BOX --- */
+.score {
+    width: 50px;
+    height: 47.66px;
+    background: var(--sb-bg-score); 
+    margin: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 40px;
+}
+
+.score.blue {
+    color: var(--sb-teamname-blue); 
+    text-shadow: var(--sb-glow-blue);
+    border-bottom: 3px solid var(--blue-primary);
+}
+
+.score.red {
+    color: var(--sb-teamname-red);
+    text-shadow: var(--sb-glow-red);
+    border-bottom: 3px solid var(--red-primary);
+}
+
+/* --- TEAM NAME --- */
+.teamname {
+    width: 290px;
+    height: 54.5px;
+    background: var(--sb-bg-teamname); 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    text-align: center;
+}
+
+.teamname.blue {
+    border-bottom: 3px solid var(--sb-border-bottom);
+    color: var(--sb-teamname-blue); 
+    text-shadow: var(--sb-glow-blue);
+    border-bottom: 3px solid var(--blue-primary);
+}
+
+.teamname.red {
+    border-bottom: 3px solid var(--sb-border-bottom);
+    color: var(--sb-teamname-red); 
+    text-shadow: var(--sb-glow-red);
+    border-bottom: 3px solid var(--red-primary);
+}
+
+/* --- TEAM LOGO --- */
+.teamlogo {
+    width: 80px;
+    height: 69.39px;
+    background: var(--sb-bg-logo); 
+    margin-top: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.teamlogo.blue {
+    box-shadow: var(--sb-box-shadow-blue);
+}
+
+.teamlogo.red {
+    box-shadow: var(--sb-box-shadow-red);
+}
+
+.teamlogo img {
+    width: 50px;
+    height: 65px;
+    object-fit: contain;
+}
+
+.space { width: 120px; }
+
+/* --- SECONDARY BOARD --- */
+.secondaryboard {
+    width: 440px;
+    height: 116.31px;
+    background: var(--sb-bg-secondary); 
+}
+
+.revblue { transform: skewX(-20deg); }
+.revred { transform: skewX(20deg); }

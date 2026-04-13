@@ -1,0 +1,32 @@
+# Dependencies
+node_modules/
+
+# Environment — never commit real secrets
+.env
+
+# Runtime-generated database files (keep examples, ignore live data)
+public/database/matchdatateam.json
+public/database/matchdraft.json
+public/database/previousmatchdraft.json
+public/database/mvpdata.json
+public/database/mapdraw.json
+public/database/schedule.json
+public/database/tableschedule.json
+public/database/notification.json
+public/database/draftbgdata.json
+public/database/flags.json
+public/database/savedmatch/
+public/Assets/costum/Theme/theme.json
+public/serverip.txt
+
+# Tournament DB (contains team/player data — optional to commit)
+# Comment this line out if you want to version-control your roster
+draft/tournament_db.json
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*

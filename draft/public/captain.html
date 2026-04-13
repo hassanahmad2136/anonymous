@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Draft - Captain</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+            --bg: #0d0f14;
+            --card: #1a1c22;
+            --border: #2a2c34;
+            --text: #e8e8e8;
+            --muted: #666;
+            --blue: #1e88e5;
+            --blue-bg: rgba(30,136,229,0.1);
+            --blue-border: rgba(30,136,229,0.4);
+            --red: #e53935;
+            --red-bg: rgba(229,57,53,0.1);
+            --red-border: rgba(229,57,53,0.4);
+            --purple: #8b5cf6;
+            --green: #22c55e;
+            --slot: 54px;
+        }
+        @media (min-width: 420px) { :root { --slot: 60px; } }
+        @media (min-width: 768px) { :root { --slot: 68px; } }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            min-height: 100vh;
+            overflow-x: hidden;
+            padding-bottom: 84px;
+        }
+
+        /* ===== HEADER ===== */
+        .header {
+            position: sticky; top: 0; z-index: 50;
+            background: rgba(13,15,20,0.97);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+        }
+        .header-top {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 10px 16px 6px;
+        }
+        .team-name { font-size: 17px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; }
+        .team-name.blue { color: var(--blue); }
+        .team-name.red  { color: var(--red); }
+
+        .phase-badge {
+            font-size: 11px; font-weight: 700; padding: 4px 11px;
+            border-radius: 20px; letter-spacing: 1.5px; text-transform: uppercase;
+        }
+        .phase-badge.banning  { background: rgba(229,57,53,0.18); color: var(--red);    border: 1px solid rgba(229,57,53,0.3); }
+        .phase-badge.picking  { background: rgba(30,136,229,0.18); color: var(--blue);  border: 1px solid rgba(30,136,229,0.3); }
+        .phase-badge.waiting  { background: rgba(139,92,246,0.18); color: var(--purple);border: 1px solid rgba(139,92,246,0.3); }
+        .phase-badge.donebadge{ background: rgba(34,197,94,0.18);  color: var(--green); border: 1px solid rgba(34,197,94,0.3); }
+
+        .header-bottom {
+            display: flex; align-items: center; justify-content: center;
+            gap: 12px; padding: 2px 16px 10px;
+        }
+        .timer-display {
+            font-size: 34px; font-weight: 900; letter-spacing: 5px;
+            font-variant-numeric: tabular-nums; min-width: 72px; text-align: center;
+            line-height: 1;
+        }
+        .timer-display.urgent { color: var(--red); animation: blink 0.7s infinite; }
+        @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.35} }
+
+        .turn-badge {
+            font-size: 12px; font-weight: 700; padding: 5px 14px;
+            border-radius: 20px; letter-spacing: 1px; text-transform: uppercase;
+        }
+        .turn-badge.yours {
+            background: rgba(34,197,94,0.18); color: var(--green);
+            border: 1px solid rgba(34,197,94,0.4);
+            animation: turnGlow 1.6s ease-in-out infinite;
+        }
+        .turn-badge.theirs {
+            background: rgba(100,100,100,0.1); color: var(--muted);
+            border: 1px solid var(--border);
+        }
+        @keyframes turnGlow {
+            0%,100%{ box-shadow: 0 0 0 0 rgba(34,197,94,0.3); }
+            50%    { box-shadow: 0 0 0 7px rgba(34,197,94,0); }
+        }
+
+        /* ===== DRAFT BOARD ===== */
+        .draft-board {
+            display: flex; flex-direction: column; gap: 8px;
+            padding: 10px 12px;
+            background: #111318;
+            border-bottom: 1px solid var(--border);
+        }
+        @media (min-width: 768px) {
+            .draft-board { flex-direction: row; gap: 12px; padding: 14px 16px; }
+        }
+
+        .team-panel {
+            flex: 1; border-radius: 12px; padding: 10px 12px 12px;
+            border: 1px solid var(--border);
+            background: rgba(255,255,255,0.02);
+        }
+        /* YOUR team — stronger tint */
+        .team-panel.mine.blue { background: var(--blue-bg); border-color: var(--blue-border); }
+        .team-panel.mine.red  { background: var(--red-bg);  border-color: var(--red-border); }
+        /* ENEMY team — subtle tint */
+        .team-panel.enemy.blue { background: rgba(30,136,229,0.03); border-color: rgba(30,136,229,0.18); }
+        .team-panel.enemy.red  { background: rgba(229,57,53,0.03);  border-color: rgba(229,57,53,0.18); }
+
+        .panel-header {
+            display: flex; align-items: center; gap: 7px; margin-bottom: 10px;
+        }
+        .panel-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+        .panel-dot.blue { background: var(--blue); box-shadow: 0 0 5px var(--blue); }
+        .panel-dot.red  { background: var(--red);  box-shadow: 0 0 5px var(--red); }
+
+        .panel-name { font-size: 13px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; flex: 1; }
+        .panel-name.blue { color: var(--blue); }
+        .panel-name.red  { color: var(--red); }
+
+        .you-tag {
+            font-size: 9px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase;
+            padding: 2px 8px; border-radius: 10px;
+        }
+        .you-tag.blue { background: rgba(30,136,229,0.28); color: #90caf9; }
+        .you-tag.red  { background: rgba(229,57,53,0.28);  color: #ef9a9a; }
+
+        .slot-row { display: flex; align-items: center; gap: 6px; margin-bottom: 7px; }
+        .slot-row:last-child { margin-bottom: 0; }
+
+        .slot-row-label {
+            font-size: 9px; letter-spacing: 1.5px; color: var(--muted);
+            text-transform: uppercase; font-weight: 700; min-width: 34px;
+        }
+
+        .slots-wrap { display: flex; gap: 5px; flex: 1; }
+
+        /* Individual hero slot */
+        .hslot {
+            width: var(--slot); height: var(--slot);
+            border-radius: 8px;
+            border: 1.5px solid var(--border);
+            background: rgba(255,255,255,0.03);
+            overflow: hidden; position: relative;
+            flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .hslot img {
+            width: 100%; height: 100%; object-fit: cover; display: block;
+        }
+        .hslot .slot-num {
+            font-size: 14px; font-weight: 700; color: rgba(255,255,255,0.1);
+            pointer-events: none;
+        }
+
+        /* Active (current turn's slot) */
+        .hslot.active {
+            border-color: var(--purple) !important;
+            animation: slotPulse 1.2s ease-in-out infinite;
+        }
+        @keyframes slotPulse {
+            0%,100%{ box-shadow: 0 0 8px rgba(139,92,246,0.5); }
+            50%    { box-shadow: 0 0 20px rgba(139,92,246,0.9), 0 0 40px rgba(139,92,246,0.3); }
+        }
+
+        /* Banned hero — darkened + red ✕ */
+        .hslot.banned img { filter: grayscale(1) brightness(0.35); }
+        .hslot.banned::after {
+            content: '✕';
+            position: absolute; inset: 0;
+            display: flex; align-items: center; justify-content: center;
+            color: #ff4444; font-size: 18px; font-weight: 900;
+            text-shadow: 0 0 10px rgba(255,68,68,0.9);
+            pointer-events: none;
+        }
+
+        /* ===== SEARCH + FILTER ===== */
+        .search-section {
+            padding: 10px 14px 6px;
+            background: var(--bg);
+            position: sticky; top: 100px; z-index: 40;
+            border-bottom: 1px solid transparent;
+        }
+        .search-input {
+            width: 100%; padding: 11px 16px;
+            background: var(--card); border: 1px solid var(--border);
+            border-radius: 10px; color: var(--text); font-size: 16px;
+            outline: none; transition: border-color 0.2s;
+        }
+        .search-input:focus { border-color: var(--purple); }
+        .search-input::placeholder { color: var(--muted); }
+
+        .role-filter {
+            display: flex; gap: 6px; padding: 8px 0 4px;
+            overflow-x: auto; -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+        }
+        .role-filter::-webkit-scrollbar { display: none; }
+
+        .role-btn {
+            padding: 6px 14px; border-radius: 16px;
+            border: 1px solid var(--border); background: transparent;
+            color: var(--muted); font-size: 12px; font-weight: 600;
+            white-space: nowrap; cursor: pointer; transition: all 0.15s;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .role-btn.active  { background: var(--purple); color: #fff; border-color: var(--purple); }
+        .role-btn:active  { transform: scale(0.94); opacity: 0.8; }
+
+        /* ===== HERO GRID ===== */
+        .hero-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+            gap: 6px; padding: 8px 14px 16px;
+        }
+        @media (min-width: 420px) { .hero-grid { grid-template-columns: repeat(auto-fill, minmax(76px, 1fr)); } }
+        @media (min-width: 768px) { .hero-grid { grid-template-columns: repeat(auto-fill, minmax(88px, 1fr)); gap: 8px; } }
+
+        .hero-card {
+            aspect-ratio: 1; border-radius: 10px; overflow: hidden;
+            position: relative; border: 2px solid transparent; cursor: pointer;
+            transition: transform 0.12s, border-color 0.12s, box-shadow 0.12s;
+            background: var(--card); user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .hero-card:active { transform: scale(0.92); }
+        .hero-card img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .hero-card .hname {
+            position: absolute; bottom: 0; left: 0; right: 0;
+            padding: 3px 4px 2px;
+            background: linear-gradient(transparent, rgba(0,0,0,0.82));
+            font-size: 8.5px; text-align: center; color: #ccc;
+            letter-spacing: 0.3px; line-height: 1.2;
+        }
+
+        .hero-card.selected {
+            border-color: var(--green);
+            box-shadow: 0 0 14px rgba(34,197,94,0.45);
+        }
+        .hero-card.selected .hname { color: #86efac; }
+
+        .hero-card.used {
+            opacity: 0.2; pointer-events: none;
+        }
+        /* "not your turn" greyscale */
+        .hero-card.idle { pointer-events: none; }
+
+        /* ===== LOCK BAR ===== */
+        .lock-bar {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            padding: 10px 14px;
+            background: rgba(13,15,20,0.97); backdrop-filter: blur(12px);
+            border-top: 1px solid var(--border); z-index: 50;
+        }
+        .lock-btn {
+            width: 100%; padding: 15px; border: none; border-radius: 12px;
+            font-size: 16px; font-weight: 800; letter-spacing: 2px;
+            text-transform: uppercase; cursor: pointer; transition: all 0.15s;
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+        }
+        .lock-btn .preview-img {
+            width: 34px; height: 34px; border-radius: 7px; overflow: hidden;
+            border: 2px solid rgba(0,0,0,0.35); flex-shrink: 0;
+        }
+        .lock-btn .preview-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+        .lock-btn.pick-ready { background: var(--green); color: #000; }
+        .lock-btn.pick-ready:active { transform: scale(0.98); background: #16a34a; }
+
+        .lock-btn.ban-ready { background: var(--red); color: #fff; }
+        .lock-btn.ban-ready:active { transform: scale(0.98); background: #b71c1c; }
+
+        .lock-btn.off {
+            background: var(--card); color: var(--muted);
+            cursor: not-allowed; border: 1px solid var(--border);
+        }
+
+        /* ===== READY SCREEN ===== */
+        .ready-screen {
+            display: flex; flex-direction: column; align-items: center;
+            justify-content: center; min-height: 85vh;
+            padding: 24px; text-align: center;
+        }
+        .ready-logo { font-size: 12px; letter-spacing: 5px; text-transform: uppercase; color: var(--purple); font-weight: 700; margin-bottom: 6px; }
+        .ready-title { font-size: 28px; font-weight: 900; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 4px; }
+        .ready-sub   { font-size: 13px; color: var(--muted); margin-bottom: 32px; }
+        .ready-teams { display: flex; gap: 44px; margin-bottom: 36px; }
+        .rteam { text-align: center; }
+        .rdot  { width: 14px; height: 14px; border-radius: 50%; margin: 0 auto 8px; background: var(--border); transition: background 0.3s, box-shadow 0.3s; }
+        .rdot.rdy { background: var(--green); box-shadow: 0 0 12px rgba(34,197,94,0.5); }
+        .rteam-name { font-size: 12px; letter-spacing: 1px; text-transform: uppercase; font-weight: 700; }
+        .ready-btn {
+            padding: 18px 56px; border: 2px solid var(--green); border-radius: 14px;
+            background: var(--green); color: #000; font-size: 18px; font-weight: 800;
+            letter-spacing: 3px; text-transform: uppercase; cursor: pointer; transition: all 0.2s;
+        }
+        .ready-btn:active { transform: scale(0.96); }
+        .ready-btn.waiting { background: transparent; color: var(--green); cursor: default; }
+
+        /* ===== MISC ===== */
+        .center-page {
+            display: flex; flex-direction: column; align-items: center;
+            justify-content: center; min-height: 100vh;
+            text-align: center; padding: 24px; gap: 10px;
+        }
+        .center-page h1 { font-size: 24px; letter-spacing: 2px; }
+        .center-page p  { color: var(--muted); font-size: 14px; }
+
+        .done-section {
+            display: flex; flex-direction: column; align-items: center;
+            justify-content: center; min-height: 40vh;
+            text-align: center; padding: 24px; gap: 8px;
+        }
+        .done-vs { font-size: 80px; font-weight: 900; letter-spacing: 10px; color: var(--red); line-height: 1; }
+
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+<!-- INVALID -->
+<div id="v-invalid" class="center-page hidden">
+    <h1 style="color:var(--red)">Invalid Link</h1>
+    <p>This draft link is invalid or has expired.</p>
+</div>
+
+<!-- READY / WAITING -->
+<div id="v-ready" class="hidden">
+    <div class="header" style="border-bottom:none;">
+        <div class="header-top">
+            <span class="team-name" id="ready-team-name"></span>
+            <span class="phase-badge waiting">Waiting</span>
+        </div>
+    </div>
+    <div class="ready-screen">
+        <div class="ready-logo">Battle of Souls</div>
+        <div class="ready-title">Draft Phase</div>
+        <div class="ready-sub">Confirm ready when your team is set</div>
+        <div class="ready-teams">
+            <div class="rteam">
+                <div class="rdot" id="blue-rdot"></div>
+                <div class="rteam-name" id="blue-rname" style="color:var(--blue)"></div>
+            </div>
+            <div class="rteam">
+                <div class="rdot" id="red-rdot"></div>
+                <div class="rteam-name" id="red-rname" style="color:var(--red)"></div>
+            </div>
+        </div>
+        <button class="ready-btn" id="ready-btn" onclick="doReady()">Ready</button>
+    </div>
+</div>
+
+<!-- DRAFT VIEW -->
+<div id="v-draft" class="hidden">
+
+    <!-- Sticky header -->
+    <div class="header">
+        <div class="header-top">
+            <span class="team-name" id="draft-team-name"></span>
+            <span class="phase-badge" id="phase-badge"></span>
+        </div>
+        <div class="header-bottom">
+            <div class="timer-display" id="timer-el">60</div>
+            <div class="turn-badge theirs" id="turn-el">—</div>
+        </div>
+    </div>
+
+    <!-- Draft board: YOUR TEAM + ENEMY TEAM -->
+    <div class="draft-board">
+        <!-- Blue panel -->
+        <div class="team-panel" id="panel-blue">
+            <div class="panel-header">
+                <div class="panel-dot blue"></div>
+                <span class="panel-name blue" id="pname-blue">Blue</span>
+                <span class="you-tag blue hidden" id="you-blue">YOU</span>
+            </div>
+            <div class="slot-row">
+                <span class="slot-row-label">Bans</span>
+                <div class="slots-wrap" id="blue-bans"></div>
+            </div>
+            <div class="slot-row">
+                <span class="slot-row-label">Picks</span>
+                <div class="slots-wrap" id="blue-picks"></div>
+            </div>
+        </div>
+
+        <!-- Red panel -->
+        <div class="team-panel" id="panel-red">
+            <div class="panel-header">
+                <div class="panel-dot red"></div>
+                <span class="panel-name red" id="pname-red">Red</span>
+                <span class="you-tag red hidden" id="you-red">YOU</span>
+            </div>
+            <div class="slot-row">
+                <span class="slot-row-label">Bans</span>
+                <div class="slots-wrap" id="red-bans"></div>
+            </div>
+            <div class="slot-row">
+                <span class="slot-row-label">Picks</span>
+                <div class="slots-wrap" id="red-picks"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search + Role Filter -->
+    <div class="search-section">
+        <input type="text" class="search-input" id="search-in" placeholder="Search hero..." oninput="renderHeroes()">
+        <div class="role-filter" id="role-filter"></div>
+    </div>
+
+    <!-- Hero grid -->
+    <div class="hero-grid" id="hero-grid"></div>
+
+    <!-- Done banner -->
+    <div id="done-section" class="done-section hidden">
+        <div class="done-vs">VS</div>
+        <h1 style="color:var(--green);font-size:18px;letter-spacing:3px;">Draft Complete</h1>
+        <p style="color:var(--muted)">Good luck, have fun!</p>
+    </div>
+
+</div>
+
+<!-- Lock bar (always visible during draft) -->
+<div class="lock-bar hidden" id="lock-bar">
+    <button class="lock-btn off" id="lock-btn" onclick="doLock()">Select a Hero</button>
+</div>
+
+<script>
+// ============================================================
+//  GLOBALS
+// ============================================================
+let mySide = null;
+let myHash = null;
+let heroList = [];
+let state = null;
+let selectedHero = null;
+let activeRole = 'All';
+
+// Hero roles — updated with latest heroes
+const heroRoles = {
+    "Tank":     ["Akai","Atlas","Baxia","Beleric","Edith","Franco","Gatotkaca","Gloo","Grock","Hilda","Hylos","Johnson","Khufra","Lolita","Minotaur","Tigreal","Uranus","Minsitthar","Fredrin","Chip","Marcel"],
+    "Fighter":  ["Aldous","Alpha","Alucard","Badang","Balmond","Chou","Dyroth","Freya","Guinevere","Hilda","Jawhead","Julian","Khaleed","Lapu Lapu","Leomord","Martis","Masha","Paquito","Phoveus","Ruby","Silvanna","Sun","Terizla","Thamuz","Xborg","Yin","Yuzhong","Arlot","Cici","Suyou","Kalea","Sora","Zetian"],
+    "Assassin": ["Aamon","Benedetta","Fanny","Gusion","Hanzo","Hayabusa","Helcurt","Joy","Karina","Lancelot","Ling","Natalia","Nolan","Saber","Selena","Zhuxin"],
+    "Mage":     ["Alice","Aurora","Cecilion","Chang'e","Cyclops","Esmeralda","Eudora","Faramis","Gord","Harith","Harley","Kadita","Kagura","Lunox","Luo Yi","Lylia","Nana","Novaria","Odette","Pharsa","Vale","Valentina","Valir","Vexana","Xavier","Yve","Zhask","Zhuxin"],
+    "Marksman": ["Beatrix","Brody","Bruno","Claude","Clint","Granger","Hanabi","Irithel","Ixia","Karrie","Kimmy","Layla","Lesley","Melissa","Miya","Moskov","Natan","Popol and Kupa","Roger","Wanwan","Yisunshin"],
+    "Support":  ["Angela","Carmila","Diggie","Estes","Floryn","Kaja","Mathilda","Rafaela","Marcel"]
+};
+const roles = ['All','Tank','Fighter','Assassin','Mage','Marksman','Support'];
+
+// ============================================================
+//  INIT
+// ============================================================
+async function init() {
+    myHash = window.location.pathname.split('/').pop();
+
+    // Validate hash → get side
+    try {
+        const r = await fetch(`/api/draft/validate/${myHash}`);
+        const d = await r.json();
+        if (!d.valid) { show('v-invalid'); return; }
+        mySide = d.side;
+    } catch (e) { show('v-invalid'); return; }
+
+    // Tag YOUR panel
+    document.getElementById('panel-' + mySide).classList.add('mine', mySide);
+    document.getElementById('panel-' + (mySide === 'blue' ? 'red' : 'blue')).classList.add('enemy', mySide === 'blue' ? 'red' : 'blue');
+    document.getElementById('you-' + mySide).classList.remove('hidden');
+
+    // Load heroes
+    try {
+        const r = await fetch('/database/herolist.json');
+        heroList = await r.json();
+    } catch (e) {}
+
+    buildRoleFilter();
+    connectWS();
+
+    try {
+        const r = await fetch('/api/draft/state');
+        state = await r.json();
+        render();
+    } catch (e) {}
+}
+
+function connectWS() {
+    const proto = location.protocol === 'https:' ? 'wss' : 'ws';
+    const ws = new WebSocket(`${proto}://${location.host}`);
+    ws.onmessage = e => {
+        try {
+            const msg = JSON.parse(e.data);
+            if (msg.type === 'state') { state = msg.data; render(); }
+        } catch (_) {}
+    };
+    ws.onclose = () => setTimeout(connectWS, 2000);
+}
+
+// ============================================================
+//  RENDER
+// ============================================================
+function render() {
+    if (!state) return;
+    const myTeam = mySide === 'blue' ? state.blueTeamName : state.redTeamName;
+
+    // ---- WAITING / READY ----
+    if (state.status === 'idle' || state.status === 'waiting') {
+        show('v-ready');
+        document.getElementById('lock-bar').classList.add('hidden');
+
+        const tnEl = document.getElementById('ready-team-name');
+        tnEl.textContent = myTeam;
+        tnEl.className = 'team-name ' + mySide;
+
+        document.getElementById('blue-rname').textContent = state.blueTeamName;
+        document.getElementById('red-rname').textContent  = state.redTeamName;
+        document.getElementById('blue-rdot').className = 'rdot' + (state.blueReady ? ' rdy' : '');
+        document.getElementById('red-rdot').className  = 'rdot' + (state.redReady  ? ' rdy' : '');
+
+        const imReady = mySide === 'blue' ? state.blueReady : state.redReady;
+        const btn = document.getElementById('ready-btn');
+        btn.textContent  = imReady ? 'Waiting for opponent…' : 'Ready';
+        btn.className    = 'ready-btn' + (imReady ? ' waiting' : '');
+        return;
+    }
+
+    // ---- DRAFT / DONE ----
+    show('v-draft');
+    document.getElementById('lock-bar').classList.remove('hidden');
+
+    // Header name
+    const dn = document.getElementById('draft-team-name');
+    dn.textContent = myTeam;
+    dn.className   = 'team-name ' + mySide;
+
+    // Phase badge
+    const badge = document.getElementById('phase-badge');
+    if (state.status === 'done') {
+        badge.textContent = 'Done';
+        badge.className   = 'phase-badge donebadge';
+    } else if (state.phaseInfo) {
+        const t = state.phaseInfo.type;
+        badge.textContent = t === 'ban' ? 'BANNING' : t === 'pick' ? 'PICKING' : t.toUpperCase();
+        badge.className   = 'phase-badge ' + (t === 'ban' ? 'banning' : 'picking');
+    }
+
+    // Timer
+    const tEl = document.getElementById('timer-el');
+    tEl.textContent = String(state.timer).padStart(2, '0');
+    tEl.className   = 'timer-display' + (state.timer <= 10 && state.timerRunning ? ' urgent' : '');
+
+    // Turn badge
+    const turnEl = document.getElementById('turn-el');
+    const isMyTurn = state.activeSide === mySide && state.status === 'live';
+    if (state.status === 'done') {
+        turnEl.textContent = 'Complete';
+        turnEl.className   = 'turn-badge theirs';
+    } else if (isMyTurn) {
+        turnEl.textContent = '⚡ Your Turn';
+        turnEl.className   = 'turn-badge yours';
+    } else {
+        turnEl.textContent = 'Opponent\'s Turn';
+        turnEl.className   = 'turn-badge theirs';
+    }
+
+    // Team names on board
+    document.getElementById('pname-blue').textContent = state.blueTeamName;
+    document.getElementById('pname-red').textContent  = state.redTeamName;
+
+    // Slots
+    renderSlots('blue-bans',  state.blueside.ban,  'ban',  'blueside');
+    renderSlots('blue-picks', state.blueside.pick, 'pick', 'blueside');
+    renderSlots('red-bans',   state.redside.ban,   'ban',  'redside');
+    renderSlots('red-picks',  state.redside.pick,  'pick', 'redside');
+
+    // Done state
+    const doneSec  = document.getElementById('done-section');
+    const heroGrid = document.getElementById('hero-grid');
+    if (state.status === 'done') {
+        doneSec.classList.remove('hidden');
+        heroGrid.classList.add('hidden');
+        document.getElementById('lock-bar').classList.add('hidden');
+    } else {
+        doneSec.classList.add('hidden');
+        heroGrid.classList.remove('hidden');
+        document.getElementById('lock-bar').classList.remove('hidden');
+        renderHeroes();
+        updateLockBtn();
+    }
+}
+
+function show(id) {
+    ['v-invalid','v-ready','v-draft'].forEach(v =>
+        document.getElementById(v).classList.toggle('hidden', v !== id)
+    );
+}
+
+// ============================================================
+//  SLOTS
+// ============================================================
+function renderSlots(containerId, heroes, type, sideKey) {
+    const c = document.getElementById(containerId);
+    c.innerHTML = '';
+
+    heroes.forEach((h, i) => {
+        const slot = document.createElement('div');
+        slot.className = 'hslot';
+
+        // Active slot highlight
+        if (state && state.phaseInfo && state.status === 'live') {
+            const p = state.phaseInfo;
+            if (p.target === sideKey && p.slot === type) {
+                const ai = p.index + (state.picksInPhase || 0);
+                if (i === ai) slot.classList.add('active');
+            }
+        }
+
+        if (h) {
+            const img = document.createElement('img');
+            img.src = h;
+            img.loading = 'lazy';
+            slot.appendChild(img);
+            if (type === 'ban') slot.classList.add('banned');
+        } else {
+            const num = document.createElement('span');
+            num.className = 'slot-num';
+            num.textContent = i + 1;
+            slot.appendChild(num);
+        }
+
+        c.appendChild(slot);
+    });
+}
+
+// ============================================================
+//  HERO GRID
+// ============================================================
+function renderHeroes() {
+    const grid   = document.getElementById('hero-grid');
+    const search = document.getElementById('search-in').value.toLowerCase();
+    const used   = state ? (state.usedHeroes || []) : [];
+    const isMyTurn = state && state.activeSide === mySide && state.status === 'live';
+
+    grid.innerHTML = '';
+    let list = heroList;
+
+    if (activeRole !== 'All') {
+        const r = heroRoles[activeRole] || [];
+        list = list.filter(h => r.includes(h.name));
+    }
+    if (search) {
+        list = list.filter(h => h.name.toLowerCase().includes(search));
+    }
+
+    list.forEach(hero => {
+        const isUsed     = used.includes(hero.img);
+        const isSelected = selectedHero === hero.img;
+
+        const card = document.createElement('div');
+        card.className = 'hero-card'
+            + (isUsed     ? ' used' : '')
+            + (isSelected ? ' selected' : '')
+            + (!isMyTurn && !isUsed ? ' idle' : '');
+
+        const img = document.createElement('img');
+        img.src = hero.img;
+        img.loading = 'lazy';
+        img.alt = hero.name;
+        card.appendChild(img);
+
+        const lbl = document.createElement('div');
+        lbl.className = 'hname';
+        lbl.textContent = hero.name;
+        card.appendChild(lbl);
+
+        if (!isUsed && isMyTurn) card.onclick = () => selectHero(hero.img);
+        grid.appendChild(card);
+    });
+}
+
+function buildRoleFilter() {
+    const c = document.getElementById('role-filter');
+    roles.forEach(role => {
+        const btn = document.createElement('button');
+        btn.className = 'role-btn' + (role === activeRole ? ' active' : '');
+        btn.textContent = role;
+        btn.onclick = () => {
+            activeRole = role;
+            document.querySelectorAll('.role-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            renderHeroes();
+        };
+        c.appendChild(btn);
+    });
+}
+
+// ============================================================
+//  LOCK BUTTON
+// ============================================================
+function updateLockBtn() {
+    const btn      = document.getElementById('lock-btn');
+    const isMyTurn = state && state.activeSide === mySide && state.status === 'live';
+    const isBan    = state && state.phaseInfo && state.phaseInfo.type === 'ban';
+
+    if (!isMyTurn) {
+        btn.className = 'lock-btn off';
+        btn.innerHTML = "Opponent's Turn";
+        return;
+    }
+    if (!selectedHero) {
+        btn.className = 'lock-btn off';
+        btn.innerHTML = isBan ? '— Select Hero to Ban —' : '— Select Hero to Pick —';
+        return;
+    }
+
+    const preview = `<div class="preview-img"><img src="${selectedHero}" alt=""></div>`;
+    if (isBan) {
+        btn.className = 'lock-btn ban-ready';
+        btn.innerHTML = preview + 'Confirm Ban';
+    } else {
+        btn.className = 'lock-btn pick-ready';
+        btn.innerHTML = preview + 'Lock In';
+    }
+}
+
+// ============================================================
+//  ACTIONS
+// ============================================================
+async function selectHero(heroImg) {
+    selectedHero = heroImg;
+    renderHeroes();
+    updateLockBtn();
+    try {
+        await fetch(`/api/draft/select/${myHash}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ hero: heroImg })
+        });
+    } catch (_) {}
+}
+
+async function doLock() {
+    if (!selectedHero) return;
+    if (!(state && state.activeSide === mySide && state.status === 'live')) return;
+    try {
+        await fetch(`/api/draft/lock/${myHash}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ hero: selectedHero })
+        });
+        selectedHero = null;
+    } catch (_) {}
+}
+
+async function doReady() {
+    const imReady = mySide === 'blue' ? state.blueReady : state.redReady;
+    if (imReady) return;
+    try {
+        await fetch(`/api/draft/ready/${myHash}`, { method: 'POST' });
+    } catch (_) {}
+}
+
+// ============================================================
+//  START
+// ============================================================
+init();
+</script>
+</body>
+</html>

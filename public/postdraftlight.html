@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Post Draft</title>
+    <style>
+        @font-face {
+            font-family: 'myfonts';
+            src: url('Assets/Font/big_noodle_titling.ttf') format('truetype');
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --blue: #1e88e5;
+            --blue-glow: rgba(30,136,229,0.3);
+            --red: #e53935;
+            --red-glow: rgba(229,57,53,0.3);
+            --border: rgba(255,255,255,0.06);
+            --text: #f0f0f0;
+            --text-muted: rgba(255,255,255,0.3);
+        }
+
+        body {
+            font-family: 'myfonts', sans-serif;
+            width: 1920px;
+            height: 1080px;
+            overflow: hidden;
+            background: #0a0a0f;
+        }
+
+        img[src=""], img:not([src]) { visibility: hidden; }
+        .hide { width: 0; height: 0; opacity: 0; position: absolute; }
+
+        /* ===== DARK BACKGROUND ===== */
+        .bg-base {
+            position: fixed; inset: 0;
+            background: radial-gradient(ellipse 70% 70% at 50% 50%, #141420, #0a0a0f);
+            z-index: 0;
+        }
+        .bg-grid {
+            position: fixed; inset: 0;
+            background-image: linear-gradient(rgba(139,92,246,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(139,92,246,0.03) 1px, transparent 1px);
+            background-size: 60px 60px;
+            animation: gridDrift 30s linear infinite;
+            mask-image: radial-gradient(ellipse 70% 70% at 50% 50%, black 30%, transparent);
+            z-index: 0;
+        }
+        .orb { position: fixed; border-radius: 50%; filter: blur(150px); animation: orbFloat ease-in-out infinite; z-index: 0; }
+        .orb-1 { width: 600px; height: 600px; background: rgba(21,101,192,0.08); top: 20%; left: -5%; animation-duration: 20s; }
+        .orb-2 { width: 600px; height: 600px; background: rgba(198,40,40,0.08); top: 20%; right: -5%; animation-duration: 25s; animation-delay: -8s; }
+        .orb-3 { width: 400px; height: 400px; background: rgba(139,92,246,0.05); top: 50%; left: 50%; transform: translateX(-50%); animation-duration: 22s; animation-delay: -12s; }
+        .noise {
+            position: fixed; inset: 0; opacity: 0.03; pointer-events: none; z-index: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+            background-size: 200px;
+        }
+        .vignette { position: fixed; inset: 0; background: radial-gradient(ellipse 80% 80% at 50% 50%, transparent 50%, rgba(0,0,0,0.6)); pointer-events: none; z-index: 0; }
+
+        /* Side glow lines */
+        .side-glow { position: fixed; top: 0; bottom: 0; width: 3px; z-index: 1; }
+        .side-glow.left { left: 0; background: linear-gradient(to bottom, transparent 15%, var(--blue) 40%, var(--blue) 60%, transparent 85%); opacity: 0.3; }
+        .side-glow.right { right: 0; background: linear-gradient(to bottom, transparent 15%, var(--red) 40%, var(--red) 60%, transparent 85%); opacity: 0.3; }
+
+        /* ===== OVERLAY ===== */
+        .mainbox {
+            width: 1920px;
+            height: 1080px;
+            position: relative;
+            z-index: 5;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ===== HEADER ===== */
+        .upper {
+            width: 1920px;
+            height: 110px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 40px;
+        }
+
+        .logoteam {
+            width: 90px;
+            height: 90px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            flex-shrink: 0;
+        }
+        .logoteam img { width: 65px; height: 65px; object-fit: contain; }
+
+        .teamnameblue {
+            flex: 1;
+            height: 70px;
+            display: flex;
+            align-items: center;
+            padding-left: 25px;
+            font-size: 46px;
+            color: var(--text);
+            letter-spacing: 4px;
+            background: linear-gradient(90deg, rgba(30,136,229,0.12), transparent 50%);
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--blue);
+            margin-left: 10px;
+        }
+
+        .vs-badge {
+            width: 70px;
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: var(--red);
+            letter-spacing: 3px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+
+        .teamnamered {
+            flex: 1;
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 25px;
+            font-size: 46px;
+            color: var(--text);
+            letter-spacing: 4px;
+            background: linear-gradient(90deg, transparent 50%, rgba(229,57,53,0.12));
+            border: 1px solid var(--border);
+            border-right: 3px solid var(--red);
+            margin-right: 10px;
+        }
+
+        /* ===== HERO PICKS ===== */
+        .middle {
+            width: 1920px;
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: stretch;
+            padding: 10px 40px 0;
+            gap: 5px;
+        }
+
+        .pick {
+            flex: 1;
+            max-width: 168px;
+            border: 1px solid var(--border);
+            background: rgba(255,255,255,0.03);
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+        }
+
+        /* Blue picks glow */
+        .middle .pick:nth-child(-n+5) {
+            border-top: 2px solid rgba(30,136,229,0.4);
+            box-shadow: inset 0 1px 15px rgba(30,136,229,0.06);
+        }
+        /* Red picks glow */
+        .middle .pick:nth-child(n+7) {
+            border-top: 2px solid rgba(229,57,53,0.4);
+            box-shadow: inset 0 1px 15px rgba(229,57,53,0.06);
+        }
+
+        .image-box {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1;
+        }
+
+        .image-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center top;
+            opacity: 0;
+            animation: heroReveal 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes heroReveal {
+            0% { opacity: 0; transform: scale(1.15); filter: brightness(2); }
+            40% { opacity: 1; filter: brightness(1.4); }
+            100% { opacity: 1; transform: scale(1); filter: brightness(1); }
+        }
+
+        .name-image-box { position: absolute; z-index: 2; display: none; }
+
+        /* Center divider */
+        .pickmid {
+            width: 50px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            gap: 8px;
+        }
+        .pickmid-vs {
+            font-size: 22px;
+            letter-spacing: 3px;
+            color: var(--red);
+            opacity: 0.5;
+        }
+        .pickmid-inner {
+            font-size: 11px;
+            letter-spacing: 4px;
+            color: var(--text-muted);
+            writing-mode: vertical-lr;
+            text-orientation: mixed;
+            text-transform: uppercase;
+        }
+
+        /* Player Nicknames — bottom of card */
+        .bluenick, .rednick {
+            position: absolute;
+            bottom: 12px;
+            left: 0;
+            right: 0;
+            z-index: 5;
+            font-size: 18px;
+            color: #fff;
+            text-align: center;
+            letter-spacing: 2px;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.7), 0 0 20px rgba(0,0,0,0.4);
+            /* Override the rotation from original */
+            width: auto;
+            margin: 0;
+            rotate: none;
+        }
+
+        /* Lane Icons */
+        .lanelogo {
+            width: 28px;
+            height: 28px;
+            position: absolute;
+            z-index: 6;
+            top: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .bluelane { right: 8px; }
+        .redlane { left: 8px; }
+        .lanelogo img { width: 80%; height: 80%; object-fit: contain; filter: brightness(2) drop-shadow(0 0 3px rgba(0,0,0,0.5)); }
+        .lane-icon { padding: 2px; background-color: rgba(0,0,0,0.4); border-radius: 5px; z-index: 1; }
+
+        .lower { display: none; }
+
+        /* Bottom dark gradient on hero cards */
+        .pick::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            height: 100px;
+            background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
+            z-index: 4;
+            pointer-events: none;
+        }
+
+        /* Staggered reveal delays */
+        .middle .pick:nth-child(1) .image-box img { animation-delay: 0.1s; }
+        .middle .pick:nth-child(2) .image-box img { animation-delay: 0.2s; }
+        .middle .pick:nth-child(3) .image-box img { animation-delay: 0.3s; }
+        .middle .pick:nth-child(4) .image-box img { animation-delay: 0.4s; }
+        .middle .pick:nth-child(5) .image-box img { animation-delay: 0.5s; }
+        .middle .pick:nth-child(7) .image-box img { animation-delay: 0.15s; }
+        .middle .pick:nth-child(8) .image-box img { animation-delay: 0.25s; }
+        .middle .pick:nth-child(9) .image-box img { animation-delay: 0.35s; }
+        .middle .pick:nth-child(10) .image-box img { animation-delay: 0.45s; }
+        .middle .pick:nth-child(11) .image-box img { animation-delay: 0.55s; }
+
+        .name-box { display: flex; align-items: center; justify-content: center; font-weight: bold; }
+
+        /* Bottom banner */
+        .bottom-banner {
+            position: fixed;
+            bottom: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            z-index: 10;
+        }
+        .banner-text {
+            font-size: 1rem;
+            letter-spacing: 6px;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.15);
+        }
+        .banner-divider {
+            width: 100px;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(139,92,246,0.2), transparent);
+            margin: 4px auto;
+        }
+        .banner-sub {
+            font-size: 0.55rem;
+            letter-spacing: 8px;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.08);
+        }
+
+        /* ===== CONTINUOUS ANIMATIONS ===== */
+
+        /* Hero cards breathe */
+        .pick {
+            animation: cardBreathe 4s ease-in-out infinite;
+        }
+        .middle .pick:nth-child(1) { animation-delay: 0s; }
+        .middle .pick:nth-child(2) { animation-delay: 0.4s; }
+        .middle .pick:nth-child(3) { animation-delay: 0.8s; }
+        .middle .pick:nth-child(4) { animation-delay: 1.2s; }
+        .middle .pick:nth-child(5) { animation-delay: 1.6s; }
+        .middle .pick:nth-child(7) { animation-delay: 0.2s; }
+        .middle .pick:nth-child(8) { animation-delay: 0.6s; }
+        .middle .pick:nth-child(9) { animation-delay: 1.0s; }
+        .middle .pick:nth-child(10) { animation-delay: 1.4s; }
+        .middle .pick:nth-child(11) { animation-delay: 1.8s; }
+
+        @keyframes cardBreathe {
+            0%, 100% { box-shadow: inset 0 1px 15px rgba(255,255,255,0.02); }
+            50% { box-shadow: inset 0 1px 25px rgba(255,255,255,0.06); }
+        }
+
+        /* Blue side glow pulse */
+        .middle .pick:nth-child(-n+5) {
+            animation: cardBreatheBlue 4s ease-in-out infinite;
+        }
+        @keyframes cardBreatheBlue {
+            0%, 100% { box-shadow: inset 0 1px 15px rgba(30,136,229,0.04), 0 0 0 rgba(30,136,229,0); }
+            50% { box-shadow: inset 0 1px 25px rgba(30,136,229,0.1), 0 0 20px rgba(30,136,229,0.04); }
+        }
+
+        /* Red side glow pulse */
+        .middle .pick:nth-child(n+7) {
+            animation: cardBreatheRed 4s ease-in-out infinite;
+        }
+        @keyframes cardBreatheRed {
+            0%, 100% { box-shadow: inset 0 1px 15px rgba(229,57,53,0.04), 0 0 0 rgba(229,57,53,0); }
+            50% { box-shadow: inset 0 1px 25px rgba(229,57,53,0.1), 0 0 20px rgba(229,57,53,0.04); }
+        }
+
+        /* Shimmer sweep across hero cards */
+        .pick::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -80%; width: 40%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent);
+            z-index: 3;
+            pointer-events: none;
+            animation: shimmerSweep 6s ease-in-out infinite;
+        }
+        .middle .pick:nth-child(1)::before { animation-delay: 0s; }
+        .middle .pick:nth-child(2)::before { animation-delay: 0.5s; }
+        .middle .pick:nth-child(3)::before { animation-delay: 1s; }
+        .middle .pick:nth-child(4)::before { animation-delay: 1.5s; }
+        .middle .pick:nth-child(5)::before { animation-delay: 2s; }
+        .middle .pick:nth-child(7)::before { animation-delay: 0.3s; }
+        .middle .pick:nth-child(8)::before { animation-delay: 0.8s; }
+        .middle .pick:nth-child(9)::before { animation-delay: 1.3s; }
+        .middle .pick:nth-child(10)::before { animation-delay: 1.8s; }
+        .middle .pick:nth-child(11)::before { animation-delay: 2.3s; }
+
+        @keyframes shimmerSweep {
+            0%, 60% { left: -80%; opacity: 0; }
+            65% { opacity: 1; }
+            100% { left: 180%; opacity: 0; }
+        }
+
+        /* Side glow lines pulse */
+        .side-glow.left {
+            animation: sideGlowBlue 3s ease-in-out infinite;
+        }
+        .side-glow.right {
+            animation: sideGlowRed 3s ease-in-out infinite;
+        }
+        @keyframes sideGlowBlue {
+            0%, 100% { opacity: 0.2; box-shadow: 0 0 15px rgba(30,136,229,0.1); }
+            50% { opacity: 0.5; box-shadow: 0 0 30px rgba(30,136,229,0.2); }
+        }
+        @keyframes sideGlowRed {
+            0%, 100% { opacity: 0.2; box-shadow: 0 0 15px rgba(229,57,53,0.1); }
+            50% { opacity: 0.5; box-shadow: 0 0 30px rgba(229,57,53,0.2); }
+        }
+
+        /* VS badge pulse */
+        .vs-badge {
+            animation: vsPulse 2.5s ease-in-out infinite;
+        }
+        @keyframes vsPulse {
+            0%, 100% { text-shadow: 0 0 10px rgba(229,57,53,0.1); }
+            50% { text-shadow: 0 0 25px rgba(229,57,53,0.4); }
+        }
+
+        /* Team name borders glow */
+        .teamnameblue {
+            animation: teamBlueGlow 3.5s ease-in-out infinite;
+        }
+        .teamnamered {
+            animation: teamRedGlow 3.5s ease-in-out infinite;
+        }
+        @keyframes teamBlueGlow {
+            0%, 100% { border-left-color: rgba(30,136,229,0.3); }
+            50% { border-left-color: rgba(30,136,229,0.7); box-shadow: inset 3px 0 15px rgba(30,136,229,0.08); }
+        }
+        @keyframes teamRedGlow {
+            0%, 100% { border-right-color: rgba(229,57,53,0.3); }
+            50% { border-right-color: rgba(229,57,53,0.7); box-shadow: inset -3px 0 15px rgba(229,57,53,0.08); }
+        }
+
+        /* Floating particles */
+        .particles { position: fixed; inset: 0; overflow: hidden; pointer-events: none; z-index: 0; }
+        .particle { position: absolute; background: rgba(139,92,246,0.2); border-radius: 50%; animation: particleFloat linear infinite; }
+        .particle-dot { position: absolute; width: 2px; height: 2px; background: rgba(255,255,255,0.15); border-radius: 50%; animation: twinkle ease-in-out infinite; }
+
+        @keyframes particleFloat { 0% { transform: translateY(1100px); opacity: 0; } 5% { opacity: 0.4; } 95% { opacity: 0.4; } 100% { transform: translateY(-20px); opacity: 0; } }
+        @keyframes twinkle { 0%, 100% { opacity: 0; transform: scale(0.5); } 50% { opacity: 1; transform: scale(1.3); } }
+
+        /* Scanline */
+        .scanline {
+            position: fixed; top: -1px; left: 0; right: 0; height: 2px;
+            background: linear-gradient(90deg, transparent 20%, rgba(139,92,246,0.04) 50%, transparent 80%);
+            animation: scanDown 8s linear infinite;
+            pointer-events: none; z-index: 1;
+        }
+        @keyframes scanDown { from { top: -2px; } to { top: 1082px; } }
+
+        /* Top border accent line */
+        .top-line {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--blue), rgba(139,92,246,0.5) 50%, var(--red));
+            z-index: 10;
+            opacity: 0.4;
+            animation: topLinePulse 4s ease-in-out infinite;
+        }
+        @keyframes topLinePulse {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 0.6; }
+        }
+
+        @keyframes gridDrift { from { transform: translate(0,0); } to { transform: translate(60px,60px); } }
+        @keyframes orbFloat { 0%, 100% { transform: translate(0,0) scale(1); } 33% { transform: translate(25px,-35px) scale(1.05); } 66% { transform: translate(-15px,20px) scale(0.97); } }
+    </style>
+</head>
+<body>
+
+<!-- Background -->
+<div class="bg-base"></div>
+<div class="bg-grid"></div>
+<div class="noise"></div>
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+<div class="orb orb-3"></div>
+<div class="vignette"></div>
+<div class="side-glow left"></div>
+<div class="side-glow right"></div>
+<div class="particles" id="particles"></div>
+<div class="scanline"></div>
+<div class="top-line"></div>
+
+<!-- Overlay -->
+<div class="hide">
+    <div id="name-box-2" class="name-box"></div>
+    <div id="name-box-9" class="name-box"></div>
+</div>
+
+<div class="mainbox">
+    <div class="upper">
+        <div class="logoteam">
+            <img id="displayImage1" src="" alt="">
+        </div>
+        <div class="teamnameblue">
+            <div id="name-box-1" class="name-box"></div>
+        </div>
+        <div class="vs-badge">VS</div>
+        <div class="teamnamered">
+            <div id="name-box-8" class="name-box"></div>
+        </div>
+        <div class="logoteam">
+            <img id="displayImage2" src="" alt="">
+        </div>
+    </div>
+
+    <div class="middle">
+        <div class="pick">
+            <div class="lanelogo bluelane"><img id="player-lane-1-blue" class="lane-icon" src="Assets/lane/none.png" alt=""></div>
+            <div id="name-box-3" class="bluenick"></div>
+            <div class="name-image-box" id="name-image-box-3"></div>
+            <div id="image-box-1" class="image-box"><img id="image-display-1" src=""></div>
+        </div>
+        <div class="pick">
+            <div class="lanelogo bluelane"><img id="player-lane-2-blue" class="lane-icon" src="Assets/lane/none.png" alt=""></div>
+            <div id="name-box-4" class="bluenick"></div>
+            <div class="name-image-box" id="name-image-box-4"></div>
+            <div id="image-box-2" class="image-box"><img id="image-display-2" src=""></div>
+        </div>
+        <div class="pick">
+            <div class="lanelogo bluelane"><img id="player-lane-3-blue" class="lane-icon" src="Assets/lane/none.png" alt=""></div>
+            <div id="name-box-5" class="bluenick"></div>
+            <div class="name-image-box" id="name-image-box-5"></div>
+            <div id="image-box-3" class="image-box"><img id="image-display-3" src=""></div>
+        </div>
+        <div class="pick">
+            <div class="lanelogo bluelane"><img id="player-lane-4-blue" class="lane-icon" src="Assets/lane/none.png" alt=""></div>
+            <div id="name-box-6" class="bluenick"></div>
+            <div class="name-image-box" id="name-image-box-6"></div>
+            <div id="image-box-4" class="image-box"><img id="image-display-4" src=""></div>
+        </div>
+        <div class="pick">
+            <div class="lanelogo bluelane"><img id="player-lane-5-blue" class="lane-icon" src="Assets/lane/none.png" alt=""></div>
+            <div id="name-box-7" class="bluenick"></div>
+            <div class="name-image-box" id="name-image-box-7"></div>
+            <div id="image-box-5" class="image-box"><img id="image-display-5" src=""></div>
+        </div>
+
+        <div class="pickmid">
+            <div class="pickmid-vs">VS</div>
+            <div class="pickmid-inner">Post Draft</div>
+        </div>
+
+        <div class="pick">
+            <div class="lanelogo redlane"><img id="player-lane-5-red" class="lane-icon" src="Assets/lane/none.png" alt=""></div>
+            <div id="name-box-14" class="rednick"></div>
+            <div class="name-image-box" id="name-image-box-14"></div>
+            <div id="image-box-10" class="image-box"><img id="image-display-10" src=""></div>
+        </div>
+        <div class="pick">
+            <div class="lanelogo redlane"><img id="player-lane-4-red" class="lane-icon" src="Assets/lane/none.png" alt=""></div>
+            <div id="name-box-13" class="rednick"></div>
+            <div class="name-image-box" id="name-image-box-13"></div>
+            <div id="image-box-9" class="image-box"><img id="image-display-9" src=""></div>
+        </div>
+        <div class="pick">
+            <div class="lanelogo redlane"><img id="player-lane-3-red" class="lane-icon" src="Assets/lane/none.png" alt=""></div>
+            <div id="name-box-12" class="rednick"></div>
+            <div class="name-image-box" id="name-image-box-12"></div>
+            <div id="image-box-8" class="image-box"><img id="image-display-8" src=""></div>
+        </div>
+        <div class="pick">
+            <div class="lanelogo redlane"><img id="player-lane-2-red" class="lane-icon" src="Assets/lane/none.png" alt=""></div>
+            <div id="name-box-11" class="rednick"></div>
+            <div class="name-image-box" id="name-image-box-11"></div>
+            <div id="image-box-7" class="image-box"><img id="image-display-7" src=""></div>
+        </div>
+        <div class="pick">
+            <div class="lanelogo redlane"><img id="player-lane-1-red" class="lane-icon" src="Assets/lane/none.png" alt=""></div>
+            <div id="name-box-10" class="rednick"></div>
+            <div class="name-image-box" id="name-image-box-10"></div>
+            <div id="image-box-6" class="image-box"><img id="image-display-6" src=""></div>
+        </div>
+    </div>
+</div>
+
+<div class="bottom-banner">
+    <div class="banner-text">Battle of Souls</div>
+    <div class="banner-divider"></div>
+    <div class="banner-sub">Where Legends Rise</div>
+</div>
+
+<audio id="hero-voice" muted></audio>
+
+<script>
+    const pEl = document.getElementById('particles');
+    for (let i = 0; i < 12; i++) {
+        const p = document.createElement('div');
+        p.className = 'particle';
+        p.style.left = Math.random() * 100 + '%';
+        p.style.animationDuration = (14 + Math.random() * 18) + 's';
+        p.style.animationDelay = -(Math.random() * 20) + 's';
+        const s = 1.5 + Math.random() * 2;
+        p.style.width = s + 'px'; p.style.height = s + 'px';
+        pEl.appendChild(p);
+    }
+    for (let i = 0; i < 25; i++) {
+        const d = document.createElement('div');
+        d.className = 'particle-dot';
+        d.style.left = Math.random() * 100 + '%';
+        d.style.top = Math.random() * 100 + '%';
+        d.style.animationDuration = (3 + Math.random() * 5) + 's';
+        d.style.animationDelay = -(Math.random() * 6) + 's';
+        pEl.appendChild(d);
+    }
+</script>
+<script src="script/displayhero.js"></script>
+<script src="script/displaynicknamelogo.js"></script>
+<script src="script/laneimg.js"></script>
+</body>
+</html>

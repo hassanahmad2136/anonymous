@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Table Schedule Control</title>
+    <style>
+        @font-face {
+            font-family: 'BigNoodle';
+            src: url('Assets/Font/big_noodle_titling.ttf') format('truetype');
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: #09090b;
+            color: #fafafa;
+            padding: 30px;
+            min-height: 100vh;
+        }
+
+        h1 {
+            font-family: 'BigNoodle', sans-serif;
+            font-size: 2.5rem;
+            letter-spacing: 2px;
+            margin-bottom: 5px;
+            background: linear-gradient(90deg, #a855f7, #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .subtitle { color: #71717a; margin-bottom: 30px; font-size: 0.9rem; }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #a855f7, #8b5cf6);
+            color: white;
+        }
+        .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 15px rgba(168,85,247,0.4); }
+
+        .btn-danger { background: #dc2626; color: white; }
+        .btn-danger:hover { background: #b91c1c; }
+
+        .btn-success { background: #10b981; color: white; }
+        .btn-success:hover { background: #059669; }
+
+        .btn-secondary { background: #27272a; color: #a1a1aa; border: 1px solid #3f3f46; }
+        .btn-secondary:hover { background: #3f3f46; color: white; }
+
+        .match-card {
+            background: rgba(24,24,27,0.8);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            backdrop-filter: blur(10px);
+        }
+
+        .match-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .match-number {
+            font-family: 'BigNoodle', sans-serif;
+            font-size: 1.3rem;
+            color: #a855f7;
+            letter-spacing: 1px;
+        }
+
+        .match-fields {
+            display: grid;
+            grid-template-columns: 1fr auto 80px auto 1fr auto;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .match-fields input, .match-fields select {
+            background: #18181b;
+            border: 1px solid #3f3f46;
+            color: #fafafa;
+            padding: 10px 12px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .match-fields input:focus, .match-fields select:focus {
+            border-color: #a855f7;
+        }
+
+        .vs-label {
+            text-align: center;
+            font-family: 'BigNoodle', sans-serif;
+            font-size: 1.5rem;
+            color: #71717a;
+        }
+
+        .logo-upload {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .logo-preview {
+            width: 40px;
+            height: 40px;
+            border-radius: 6px;
+            background: #27272a;
+            border: 1px solid #3f3f46;
+            object-fit: contain;
+        }
+
+        .logo-btn {
+            padding: 8px 12px;
+            background: #27272a;
+            border: 1px solid #3f3f46;
+            color: #a1a1aa;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.75rem;
+            transition: all 0.2s;
+        }
+        .logo-btn:hover { background: #3f3f46; color: white; }
+
+        .time-input { width: 100px; text-align: center; }
+
+        .status-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(9,9,11,0.95);
+            border-top: 1px solid #27272a;
+            padding: 12px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            backdrop-filter: blur(10px);
+        }
+
+        .status-text { color: #71717a; font-size: 0.85rem; }
+        .status-text.saved { color: #10b981; }
+
+        .color-controls {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: rgba(24,24,27,0.8);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 10px;
+        }
+
+        .color-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .color-group label {
+            font-size: 0.8rem;
+            color: #a1a1aa;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .color-group input[type="color"] {
+            width: 35px;
+            height: 35px;
+            border: 1px solid #3f3f46;
+            border-radius: 6px;
+            cursor: pointer;
+            background: none;
+            padding: 2px;
+        }
+
+        .title-input {
+            background: #18181b;
+            border: 1px solid #3f3f46;
+            color: #fafafa;
+            padding: 10px 15px;
+            border-radius: 6px;
+            font-size: 1rem;
+            outline: none;
+            width: 300px;
+        }
+        .title-input:focus { border-color: #a855f7; }
+
+        input[type="file"] { display: none; }
+
+        .padding-bottom { padding-bottom: 70px; }
+    </style>
+</head>
+<body class="padding-bottom">
+    <h1>TABLE SCHEDULE CONTROL</h1>
+    <p class="subtitle">Manage tournament match schedule in table format for OBS display.</p>
+
+    <!-- Timer Control -->
+    <div class="color-controls" style="flex-direction:column;align-items:stretch;gap:12px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+            <span style="font-family:'BigNoodle',sans-serif;font-size:1.3rem;letter-spacing:2px;color:#a855f7;">COUNTDOWN TIMER</span>
+            <span id="timerPreview" style="font-family:'BigNoodle',sans-serif;font-size:1.5rem;letter-spacing:3px;color:#fafafa;">00:10:00</span>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+            <div class="color-group">
+                <label>Hours</label>
+                <input type="number" id="timerHours" value="0" min="0" max="23" style="width:60px;background:#18181b;border:1px solid #3f3f46;color:#fafafa;padding:8px;border-radius:6px;text-align:center;font-size:1rem;" oninput="updateTimerPreview()">
+            </div>
+            <div class="color-group">
+                <label>Minutes</label>
+                <input type="number" id="timerMinutes" value="10" min="0" max="59" style="width:60px;background:#18181b;border:1px solid #3f3f46;color:#fafafa;padding:8px;border-radius:6px;text-align:center;font-size:1rem;" oninput="updateTimerPreview()">
+            </div>
+            <div class="color-group">
+                <label>Seconds</label>
+                <input type="number" id="timerSeconds" value="0" min="0" max="59" style="width:60px;background:#18181b;border:1px solid #3f3f46;color:#fafafa;padding:8px;border-radius:6px;text-align:center;font-size:1rem;" oninput="updateTimerPreview()">
+            </div>
+            <button class="btn btn-primary" onclick="sendTimer('start')">Start</button>
+            <button class="btn btn-danger" onclick="sendTimer('pause')">Pause</button>
+            <button class="btn btn-secondary" onclick="sendTimer('reset')">Reset</button>
+        </div>
+    </div>
+
+    <div class="color-controls">
+        <div class="color-group">
+            <label>Table BG</label>
+            <input type="color" id="bgColor" value="#1a1a2e">
+        </div>
+        <div class="color-group">
+            <label>Header BG</label>
+            <input type="color" id="headerColor" value="#a855f7">
+        </div>
+        <div class="color-group">
+            <label>Row BG</label>
+            <input type="color" id="rowColor" value="#16213e">
+        </div>
+        <div class="color-group">
+            <label>Alt Row</label>
+            <input type="color" id="altRowColor" value="#0f3460">
+        </div>
+        <div class="color-group">
+            <label>Text</label>
+            <input type="color" id="textColor" value="#ffffff">
+        </div>
+        <div class="color-group">
+            <label>Border</label>
+            <input type="color" id="borderColor" value="#a855f7">
+        </div>
+        <div class="color-group">
+            <label>Title</label>
+            <input type="text" id="tableTitle" class="title-input" value="MATCH SCHEDULE" placeholder="Table Title">
+        </div>
+    </div>
+
+    <div class="controls">
+        <button class="btn btn-primary" onclick="addMatch()">+ Add Match</button>
+        <button class="btn btn-success" onclick="saveSchedule()">Save & Push</button>
+        <button class="btn btn-danger" onclick="clearAll()">Clear All</button>
+    </div>
+
+    <div id="matchList"></div>
+
+    <div class="status-bar">
+        <span class="status-text" id="statusText">Ready</span>
+        <span class="status-text">Table Schedule Control v1.0</span>
+    </div>
+
+    <script>
+        let matches = [];
+        let serverIP = 'localhost';
+        const serverPort = 3000;
+
+        async function initIP() {
+            try {
+                const res = await fetch('/serverip.txt');
+                const ip = (await res.text()).trim();
+                if (ip) serverIP = ip;
+            } catch(e) {}
+        }
+        initIP();
+
+        function addMatch() {
+            matches.push({
+                id: Date.now(),
+                team1: '',
+                team2: '',
+                logo1: '',
+                logo2: '',
+                time: '',
+                score1: '0',
+                score2: '0',
+                status: 'upcoming'
+            });
+            render();
+        }
+
+        function removeMatch(id) {
+            matches = matches.filter(m => m.id !== id);
+            render();
+        }
+
+        function moveMatch(id, dir) {
+            const idx = matches.findIndex(m => m.id === id);
+            const newIdx = idx + dir;
+            if (newIdx < 0 || newIdx >= matches.length) return;
+            [matches[idx], matches[newIdx]] = [matches[newIdx], matches[idx]];
+            render();
+        }
+
+        function updateMatch(id, field, value) {
+            const match = matches.find(m => m.id === id);
+            if (match) match[field] = value;
+        }
+
+        function handleLogoUpload(id, team, input) {
+            const file = input.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const match = matches.find(m => m.id === id);
+                if (match) {
+                    match[`logo${team}`] = e.target.result;
+                    render();
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function clearAll() {
+            if (confirm('Clear all matches?')) {
+                matches = [];
+                render();
+            }
+        }
+
+        function render() {
+            const list = document.getElementById('matchList');
+            list.innerHTML = matches.map((m, i) => `
+                <div class="match-card">
+                    <div class="match-header">
+                        <span class="match-number">MATCH ${i + 1}</span>
+                        <div style="display:flex;gap:5px;">
+                            <button class="btn btn-secondary" onclick="moveMatch(${m.id}, -1)" ${i === 0 ? 'disabled' : ''}>▲</button>
+                            <button class="btn btn-secondary" onclick="moveMatch(${m.id}, 1)" ${i === matches.length - 1 ? 'disabled' : ''}>▼</button>
+                            <button class="btn btn-danger" onclick="removeMatch(${m.id})" style="padding:8px 12px;">✕</button>
+                        </div>
+                    </div>
+                    <div class="match-fields">
+                        <div>
+                            <input type="text" placeholder="Team 1 Name" value="${m.team1}"
+                                oninput="updateMatch(${m.id}, 'team1', this.value)" style="width:100%;">
+                            <div class="logo-upload" style="margin-top:8px;">
+                                <img src="${m.logo1 || 'Assets/Other/transparent.png'}" class="logo-preview" id="preview1-${m.id}">
+                                <label class="logo-btn" for="logo1-${m.id}">Logo</label>
+                                <input type="file" id="logo1-${m.id}" accept="image/*" onchange="handleLogoUpload(${m.id}, 1, this)">
+                            </div>
+                        </div>
+
+                        <div>
+                            <input type="text" class="time-input" value="${m.score1}" placeholder="0"
+                                oninput="updateMatch(${m.id}, 'score1', this.value)" style="width:50px;text-align:center;">
+                        </div>
+
+                        <div class="vs-label">VS</div>
+
+                        <div>
+                            <input type="text" class="time-input" value="${m.score2}" placeholder="0"
+                                oninput="updateMatch(${m.id}, 'score2', this.value)" style="width:50px;text-align:center;">
+                        </div>
+
+                        <div>
+                            <input type="text" placeholder="Team 2 Name" value="${m.team2}"
+                                oninput="updateMatch(${m.id}, 'team2', this.value)" style="width:100%;">
+                            <div class="logo-upload" style="margin-top:8px;">
+                                <img src="${m.logo2 || 'Assets/Other/transparent.png'}" class="logo-preview" id="preview2-${m.id}">
+                                <label class="logo-btn" for="logo2-${m.id}">Logo</label>
+                                <input type="file" id="logo2-${m.id}" accept="image/*" onchange="handleLogoUpload(${m.id}, 2, this)">
+                            </div>
+                        </div>
+
+                        <div>
+                            <input type="text" class="time-input" placeholder="Time" value="${m.time}"
+                                oninput="updateMatch(${m.id}, 'time', this.value)">
+                            <select style="margin-top:8px;width:100%;" onchange="updateMatch(${m.id}, 'status', this.value)">
+                                <option value="upcoming" ${m.status === 'upcoming' ? 'selected' : ''}>Upcoming</option>
+                                <option value="live" ${m.status === 'live' ? 'selected' : ''}>Live</option>
+                                <option value="finished" ${m.status === 'finished' ? 'selected' : ''}>Finished</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function saveSchedule() {
+            const data = {
+                title: document.getElementById('tableTitle').value,
+                colors: {
+                    bg: document.getElementById('bgColor').value,
+                    header: document.getElementById('headerColor').value,
+                    row: document.getElementById('rowColor').value,
+                    altRow: document.getElementById('altRowColor').value,
+                    text: document.getElementById('textColor').value,
+                    border: document.getElementById('borderColor').value,
+                },
+                matches: matches
+            };
+
+            try {
+                const res = await fetch('/api/tableschedule', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                if (res.ok) {
+                    const status = document.getElementById('statusText');
+                    status.textContent = 'Saved & pushed to display!';
+                    status.classList.add('saved');
+                    setTimeout(() => {
+                        status.textContent = 'Ready';
+                        status.classList.remove('saved');
+                    }, 3000);
+                }
+            } catch(e) {
+                alert('Failed to save. Is server running?');
+            }
+        }
+
+        async function loadSchedule() {
+            try {
+                const res = await fetch('/api/tableschedule');
+                const data = await res.json();
+                if (data.matches && data.matches.length > 0) {
+                    matches = data.matches;
+                    if (data.colors) {
+                        document.getElementById('bgColor').value = data.colors.bg || '#1a1a2e';
+                        document.getElementById('headerColor').value = data.colors.header || '#a855f7';
+                        document.getElementById('rowColor').value = data.colors.row || '#16213e';
+                        document.getElementById('altRowColor').value = data.colors.altRow || '#0f3460';
+                        document.getElementById('textColor').value = data.colors.text || '#ffffff';
+                        document.getElementById('borderColor').value = data.colors.border || '#a855f7';
+                    }
+                    if (data.title) document.getElementById('tableTitle').value = data.title;
+                    render();
+                }
+            } catch(e) {}
+        }
+
+        loadSchedule();
+
+        // Timer control
+        function updateTimerPreview() {
+            const h = String(parseInt(document.getElementById('timerHours').value) || 0).padStart(2, '0');
+            const m = String(parseInt(document.getElementById('timerMinutes').value) || 0).padStart(2, '0');
+            const s = String(parseInt(document.getElementById('timerSeconds').value) || 0).padStart(2, '0');
+            document.getElementById('timerPreview').textContent = `${h}:${m}:${s}`;
+        }
+
+        let timerWS = null;
+        function connectTimerWS() {
+            timerWS = new WebSocket(`ws://${location.host}`);
+            timerWS.onclose = () => setTimeout(connectTimerWS, 3000);
+        }
+        connectTimerWS();
+
+        function sendTimer(action) {
+            const h = parseInt(document.getElementById('timerHours').value) || 0;
+            const m = parseInt(document.getElementById('timerMinutes').value) || 0;
+            const s = parseInt(document.getElementById('timerSeconds').value) || 0;
+            const totalSeconds = h * 3600 + m * 60 + s;
+
+            if (timerWS && timerWS.readyState === WebSocket.OPEN) {
+                timerWS.send(JSON.stringify({
+                    type: 'update',
+                    timerAction: action,
+                    timerSeconds: totalSeconds
+                }));
+
+                const status = document.getElementById('statusText');
+                if (action === 'start') status.textContent = 'Timer started!';
+                else if (action === 'pause') status.textContent = 'Timer paused!';
+                else if (action === 'reset') status.textContent = 'Timer reset!';
+                status.classList.add('saved');
+                setTimeout(() => { status.textContent = 'Ready'; status.classList.remove('saved'); }, 2000);
+            }
+        }
+    </script>
+</body>
+</html>

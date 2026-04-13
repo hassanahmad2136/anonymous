@@ -1,0 +1,20 @@
+{
+  "name": "anonymous",
+  "version": "4.8.0",
+  "description": "Battle of Souls - MLBB Tournament Streaming Overlay Tool",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "start:draft": "node draft/server.js",
+    "dev": "node server.js & node draft/server.js"
+  },
+  "keywords": ["mlbb", "overlay", "tournament", "esports", "obs"],
+  "author": "Shapitos Gaming",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "express": "^5.1.0",
+    "multer": "^2.0.2",
+    "ws": "^8.18.3"
+  }
+}

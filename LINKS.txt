@@ -1,0 +1,66 @@
+============================================
+  BATTLE OF SOULS - ALL LINKS
+  False MLBB Overlay Tool V4.8
+============================================
+
+SERVER COMMANDS:
+  Overlay Server:  cd ~/Downloads/False\ MLBB\ Overlay\ Tool\ V4.7/False\ MLBB\ Overlaytool\ V4.8/ && node server.js
+  Draft Server:    cd ~/Downloads/False\ MLBB\ Overlay\ Tool\ V4.7/False\ MLBB\ Overlaytool\ V4.8/draft && node server.js
+
+============================================
+  1. STARTING SOON SCENE
+============================================
+
+OBS Browser Source:
+  - Starting Soon Display:  http://localhost:3000/startingsoon.html
+
+============================================
+  2. DRAFT PHASE SCENE
+============================================
+
+OBS Browser Sources:
+  - Draft Background:       http://localhost:3000/draftbg.html
+  - Draft Overlay:          http://localhost:3000/displaylight.html
+
+Control Panel (legacy, still works):
+  - Draft Pick/Ban Control: http://localhost:3000/control.html
+  - Draft BG Control:       http://localhost:3000/draftbgcontrol.html
+
+============================================
+  3. POST-DRAFT SCENE
+============================================
+
+OBS Browser Source (single URL — background + overlay combined):
+  - Post-Draft:             http://localhost:3000/postdraftlight.html
+
+(No separate control panel — pulls data automatically from draft)
+
+============================================
+  4. CAPTAIN DRAFT SYSTEM (Port 3001)
+============================================
+
+Unified Admin Panel (ALL controls in one page):
+  - Admin:                  http://localhost:3001/admin.html
+    Tab 1 - Setup: teams, generate links, ngrok, game number
+    Tab 2 - Draft: live status, pause/resume, skip, reset, post-draft assignment
+    Tab 3 - Broadcast: casters, sponsors, group stage, player spotlight
+    Tab 4 - Match: previous draft editor
+
+Captain Links:
+  - Generated from admin panel — unique 8-char hash each match
+  - Example: http://localhost:3001/draft/a1b2c3d4
+
+For Remote Captains (via ngrok):
+  1. Run: ngrok http 3001
+  2. Paste ngrok URL in admin panel
+  3. Share generated links to captains
+
+============================================
+  REMAINING SCENES (TODO)
+============================================
+
+  - In-Game Scoreboard:     http://localhost:3000/scoreboard.html
+  - Post-Game:              http://localhost:3000/postgame.html
+  - Schedule:               http://localhost:3000/scheduledisplay.html
+  - MVP Display:            http://localhost:3000/mvpdisplay.html
+  - Head-to-Head Analysis:  (custom - to be built)

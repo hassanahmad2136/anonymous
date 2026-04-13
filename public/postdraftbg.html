@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Post Draft Background</title>
+    <style>
+        @font-face {
+            font-family: 'BigNoodle';
+            src: url('Assets/Font/big_noodle_titling.ttf') format('truetype');
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background: #e8e6f0;
+            width: 1920px;
+            height: 1080px;
+            overflow: hidden;
+        }
+
+        .bg-base {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: radial-gradient(ellipse 80% 80% at 50% 50%, #f0eef5, #ddd9e8), linear-gradient(135deg, #ede9f6, #e0dce8);
+        }
+        .bg-grid {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background-image: linear-gradient(rgba(139,92,246,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(139,92,246,0.04) 1px, transparent 1px);
+            background-size: 60px 60px;
+            animation: gridDrift 30s linear infinite;
+            mask-image: radial-gradient(ellipse 75% 75% at 50% 50%, black 40%, transparent);
+        }
+        .orb { position: fixed; border-radius: 50%; filter: blur(120px); animation: orbFloat ease-in-out infinite; }
+        .orb-1 { width: 600px; height: 600px; background: rgba(139,92,246,0.08); top: -10%; left: -5%; animation-duration: 20s; }
+        .orb-2 { width: 500px; height: 500px; background: rgba(59,130,246,0.06); bottom: -10%; right: -5%; animation-duration: 25s; animation-delay: -8s; }
+        .orb-3 { width: 400px; height: 400px; background: rgba(236,72,153,0.04); top: 50%; left: 50%; animation-duration: 22s; animation-delay: -12s; }
+        .noise {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0; opacity: 0.025; pointer-events: none;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+            background-size: 200px;
+        }
+        .particles { position: fixed; top: 0; left: 0; right: 0; bottom: 0; overflow: hidden; pointer-events: none; }
+        .particle { position: absolute; background: rgba(139,92,246,0.15); border-radius: 50%; animation: particleUp linear infinite; }
+        .particle-dot { position: absolute; width: 2px; height: 2px; background: rgba(139,92,246,0.2); border-radius: 50%; box-shadow: 0 0 4px rgba(139,92,246,0.1); animation: twinkle ease-in-out infinite; }
+        .vignette { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: radial-gradient(ellipse 85% 85% at 50% 50%, transparent 60%, rgba(200,195,215,0.4)); pointer-events: none; }
+
+        /* Side accents */
+        .side-accent {
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+        }
+        .side-accent.left {
+            left: 0;
+            background: linear-gradient(to bottom, transparent 10%, rgba(21,101,192,0.2) 30%, rgba(21,101,192,0.3) 50%, rgba(21,101,192,0.2) 70%, transparent 90%);
+        }
+        .side-accent.right {
+            right: 0;
+            background: linear-gradient(to bottom, transparent 10%, rgba(198,40,40,0.2) 30%, rgba(198,40,40,0.3) 50%, rgba(198,40,40,0.2) 70%, transparent 90%);
+        }
+
+        /* Bottom banner */
+        .bottom-banner {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            z-index: 10;
+        }
+        .banner-text {
+            font-family: 'BigNoodle', Impact, sans-serif;
+            font-size: 1rem;
+            letter-spacing: 6px;
+            text-transform: uppercase;
+            color: rgba(80,80,90,0.3);
+        }
+        .banner-divider {
+            width: 120px;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(139,92,246,0.2), transparent);
+            margin: 6px auto;
+        }
+        .banner-sub {
+            font-family: 'BigNoodle', Impact, sans-serif;
+            font-size: 0.6rem;
+            letter-spacing: 8px;
+            text-transform: uppercase;
+            color: rgba(80,80,90,0.2);
+        }
+
+        /* Corner brackets */
+        .corner { position: fixed; width: 50px; height: 50px; opacity: 0; animation: fadeIn 1s ease 0.5s forwards; }
+        .corner::before, .corner::after { content: ''; position: absolute; background: rgba(139,92,246,0.12); }
+        .corner-tl { top: 40px; left: 40px; } .corner-tl::before { top: 0; left: 0; width: 25px; height: 1px; } .corner-tl::after { top: 0; left: 0; width: 1px; height: 25px; }
+        .corner-tr { top: 40px; right: 40px; } .corner-tr::before { top: 0; right: 0; width: 25px; height: 1px; } .corner-tr::after { top: 0; right: 0; width: 1px; height: 25px; }
+        .corner-bl { bottom: 40px; left: 40px; } .corner-bl::before { bottom: 0; left: 0; width: 25px; height: 1px; } .corner-bl::after { bottom: 0; left: 0; width: 1px; height: 25px; }
+        .corner-br { bottom: 40px; right: 40px; } .corner-br::before { bottom: 0; right: 0; width: 25px; height: 1px; } .corner-br::after { bottom: 0; right: 0; width: 1px; height: 25px; }
+
+        @keyframes gridDrift { from { transform: translate(0,0); } to { transform: translate(60px,60px); } }
+        @keyframes orbFloat { 0%, 100% { transform: translate(0,0) scale(1); } 33% { transform: translate(25px,-35px) scale(1.05); } 66% { transform: translate(-15px,20px) scale(0.97); } }
+        @keyframes particleUp { 0% { transform: translateY(1100px); opacity: 0; } 5% { opacity: 0.5; } 95% { opacity: 0.5; } 100% { transform: translateY(-20px); opacity: 0; } }
+        @keyframes twinkle { 0%, 100% { opacity: 0; transform: scale(0.5); } 50% { opacity: 1; transform: scale(1.2); } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    </style>
+</head>
+<body>
+    <div class="bg-base"></div>
+    <div class="bg-grid"></div>
+    <div class="noise"></div>
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+    <div class="particles" id="particles"></div>
+    <div class="vignette"></div>
+    <div class="corner corner-tl"></div>
+    <div class="corner corner-tr"></div>
+    <div class="corner corner-bl"></div>
+    <div class="corner corner-br"></div>
+    <div class="side-accent left"></div>
+    <div class="side-accent right"></div>
+
+    <div class="bottom-banner">
+        <div class="banner-text">Battle of Souls</div>
+        <div class="banner-divider"></div>
+        <div class="banner-sub">Where Legends Rise</div>
+    </div>
+
+    <script>
+        const pEl = document.getElementById('particles');
+        for (let i = 0; i < 15; i++) {
+            const p = document.createElement('div');
+            p.className = 'particle';
+            p.style.left = Math.random() * 100 + '%';
+            p.style.animationDuration = (12 + Math.random() * 15) + 's';
+            p.style.animationDelay = -(Math.random() * 20) + 's';
+            const s = 1.5 + Math.random() * 2;
+            p.style.width = s + 'px'; p.style.height = s + 'px';
+            pEl.appendChild(p);
+        }
+        for (let i = 0; i < 30; i++) {
+            const d = document.createElement('div');
+            d.className = 'particle-dot';
+            d.style.left = Math.random() * 100 + '%';
+            d.style.top = Math.random() * 100 + '%';
+            d.style.animationDuration = (3 + Math.random() * 5) + 's';
+            d.style.animationDelay = -(Math.random() * 6) + 's';
+            pEl.appendChild(d);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,297 @@
+@font-face {
+    font-family: 'myfonts';
+    src: url('Assets/Font/big_noodle_titling.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+:root {
+    --blue-accent: #1565c0;
+    --red-accent: #c62828;
+    --border: rgba(139,92,246,0.12);
+    --text-dark: #1a1a1a;
+    --bg-glass: rgba(255,255,255,0.55);
+    --bg-glass-dark: rgba(240,238,245,0.7);
+}
+
+body {
+    font-family: 'myfonts', sans-serif;
+    background: transparent;
+    margin: 0;
+    padding: 0;
+}
+
+img[src=""], img:not([src]) { visibility: hidden; }
+
+.hide {
+    width: 0; height: 0; opacity: 0; position: absolute;
+}
+
+.mainbox {
+    width: 1920px;
+    height: 1080px;
+    position: relative;
+}
+
+/* ===== UPPER - Team Names & Logos ===== */
+.upper {
+    width: 1920px;
+    height: 160px;
+    display: flex;
+    align-items: center;
+    position: relative;
+    z-index: 5;
+}
+
+.logoteam {
+    width: 160px;
+    height: 160px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-glass);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    margin: 0 10px;
+}
+
+.logoteam img {
+    width: 110px;
+    height: 110px;
+    object-fit: contain;
+}
+
+.teamnameblue {
+    flex: 1;
+    height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    padding-left: 30px;
+    font-size: 60px;
+    color: var(--text-dark);
+    letter-spacing: 3px;
+    background: linear-gradient(135deg, rgba(21,101,192,0.1), transparent);
+    backdrop-filter: blur(8px);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-top: 20px;
+}
+
+.teamnamered {
+    flex: 1;
+    height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: 30px;
+    font-size: 60px;
+    color: var(--text-dark);
+    letter-spacing: 3px;
+    background: linear-gradient(135deg, transparent, rgba(198,40,40,0.1));
+    backdrop-filter: blur(8px);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-top: 20px;
+}
+
+.vs-badge {
+    width: 80px;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    color: var(--text-dark);
+    letter-spacing: 3px;
+    background: var(--bg-glass);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    flex-shrink: 0;
+    box-shadow: 0 4px 20px rgba(139,92,246,0.08);
+}
+
+/* ===== MIDDLE - Hero Picks ===== */
+.middle {
+    width: 1920px;
+    height: 700px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0 20px;
+    position: relative;
+    z-index: 3;
+}
+
+.pick {
+    width: 165px;
+    height: 620px;
+    border: 1px solid var(--border);
+    background: var(--bg-glass);
+    backdrop-filter: blur(8px);
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    margin: 0 3px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+    transition: all 0.3s;
+}
+
+.pick:hover {
+    box-shadow: 0 8px 30px rgba(139,92,246,0.08);
+}
+
+.image-box {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transform: scale(1.35);
+    position: absolute;
+    z-index: 1;
+}
+
+.image-box img {
+    opacity: 0;
+    animation: heroRevealPost 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes heroRevealPost {
+    0% { opacity: 0; transform: scale(1.2); filter: brightness(1.8); }
+    50% { opacity: 1; filter: brightness(1.3); }
+    100% { opacity: 1; transform: scale(1); filter: brightness(1); }
+}
+
+.name-image-box {
+    position: absolute;
+    z-index: 2;
+    display: none;
+}
+
+.pickmid {
+    width: 100px;
+    height: 620px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.pickmid-inner {
+    font-size: 30px;
+    letter-spacing: 5px;
+    color: rgba(80,80,90,0.3);
+    writing-mode: vertical-lr;
+    text-orientation: mixed;
+    text-transform: uppercase;
+}
+
+/* Player Nicknames */
+.bluenick {
+    width: 600px;
+    font-size: 32px;
+    color: #ffffff;
+    text-shadow: 0 2px 8px rgba(21,101,192,0.3), 0 1px 3px rgba(0,0,0,0.2);
+    margin-top: -260px;
+    margin-left: 108px;
+    position: absolute;
+    z-index: 3;
+    rotate: -90deg;
+    letter-spacing: 2px;
+}
+
+.rednick {
+    width: 600px;
+    font-size: 32px;
+    color: #ffffff;
+    text-shadow: 0 2px 8px rgba(198,40,40,0.3), 0 1px 3px rgba(0,0,0,0.2);
+    margin-top: -260px;
+    margin-left: -110px;
+    position: absolute;
+    z-index: 3;
+    rotate: -90deg;
+    letter-spacing: 2px;
+}
+
+/* Lane Icons */
+.lanelogo {
+    width: 35px;
+    height: 35px;
+    position: absolute;
+    z-index: 4;
+    top: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.bluelane { right: 12px; }
+.redlane { left: 12px; }
+
+.lanelogo img {
+    width: 80%;
+    height: 80%;
+    object-fit: contain;
+    filter: brightness(0.3);
+}
+
+.lane-icon {
+    padding: 3px;
+    background-color: rgba(255,255,255,0.7);
+    border-radius: 6px;
+    z-index: 1;
+}
+
+/* Bottom accent line */
+.lower {
+    width: 1920px;
+    height: 220px;
+    position: relative;
+}
+
+/* Score badges on hero cards */
+.pick::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 60px;
+    background: linear-gradient(to top, rgba(0,0,0,0.4), transparent);
+    z-index: 2;
+    pointer-events: none;
+}
+
+/* Blue side accent */
+.middle .pick:nth-child(-n+5) {
+    border-bottom: 3px solid rgba(21,101,192,0.3);
+}
+
+/* Red side accent */
+.middle .pick:nth-child(n+7) {
+    border-bottom: 3px solid rgba(198,40,40,0.3);
+}
+
+/* Staggered reveal animation */
+.middle .pick:nth-child(1) .image-box img { animation-delay: 0.1s; }
+.middle .pick:nth-child(2) .image-box img { animation-delay: 0.25s; }
+.middle .pick:nth-child(3) .image-box img { animation-delay: 0.4s; }
+.middle .pick:nth-child(4) .image-box img { animation-delay: 0.55s; }
+.middle .pick:nth-child(5) .image-box img { animation-delay: 0.7s; }
+.middle .pick:nth-child(7) .image-box img { animation-delay: 0.15s; }
+.middle .pick:nth-child(8) .image-box img { animation-delay: 0.3s; }
+.middle .pick:nth-child(9) .image-box img { animation-delay: 0.45s; }
+.middle .pick:nth-child(10) .image-box img { animation-delay: 0.6s; }
+.middle .pick:nth-child(11) .image-box img { animation-delay: 0.75s; }
+
+/* Name boxes */
+.name-box {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+}

@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Draft Phase Background</title>
+    <style>
+        @font-face {
+            font-family: 'BigNoodle';
+            src: url('Assets/Font/big_noodle_titling.ttf') format('truetype');
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background: #e8e6f0;
+            width: 1920px;
+            height: 1080px;
+            overflow: hidden;
+        }
+
+        .bg-base {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: radial-gradient(ellipse 80% 80% at 50% 50%, #f0eef5, #ddd9e8), linear-gradient(135deg, #ede9f6, #e0dce8);
+        }
+        .bg-grid {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background-image: linear-gradient(rgba(139,92,246,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(139,92,246,0.04) 1px, transparent 1px);
+            background-size: 60px 60px;
+            animation: gridDrift 30s linear infinite;
+            mask-image: radial-gradient(ellipse 75% 75% at 50% 50%, black 40%, transparent);
+        }
+        .orb { position: fixed; border-radius: 50%; filter: blur(120px); animation: orbFloat ease-in-out infinite; }
+        .orb-1 { width: 600px; height: 600px; background: rgba(139,92,246,0.08); top: -10%; left: -5%; animation-duration: 20s; }
+        .orb-2 { width: 500px; height: 500px; background: rgba(59,130,246,0.06); bottom: -10%; right: -5%; animation-duration: 25s; animation-delay: -8s; }
+        .orb-3 { width: 400px; height: 400px; background: rgba(236,72,153,0.04); top: 50%; left: 50%; animation-duration: 22s; animation-delay: -12s; }
+        .noise {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0; opacity: 0.025; pointer-events: none;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+            background-size: 200px;
+        }
+        .particles { position: fixed; top: 0; left: 0; right: 0; bottom: 0; overflow: hidden; pointer-events: none; }
+        .particle { position: absolute; background: rgba(139,92,246,0.15); border-radius: 50%; animation: particleUp linear infinite; }
+        .particle-dot { position: absolute; width: 2px; height: 2px; background: rgba(139,92,246,0.2); border-radius: 50%; box-shadow: 0 0 4px rgba(139,92,246,0.1); animation: twinkle ease-in-out infinite; }
+        .streak { position: fixed; height: 1px; background: linear-gradient(90deg, transparent, rgba(139,92,246,0.06), rgba(168,85,247,0.1), rgba(139,92,246,0.06), transparent); animation: streakPass ease-in-out infinite; }
+        .streak-1 { top: 22%; width: 100%; animation-duration: 12s; }
+        .streak-2 { top: 78%; width: 100%; animation-duration: 14s; animation-delay: -6s; }
+        .vignette { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: radial-gradient(ellipse 85% 85% at 50% 50%, transparent 60%, rgba(200,195,215,0.4)); pointer-events: none; }
+        .scanline { position: fixed; top: -1px; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent 20%, rgba(139,92,246,0.03) 50%, transparent 80%); animation: scanDown 10s linear infinite; pointer-events: none; }
+        .corner { position: fixed; width: 50px; height: 50px; opacity: 0; animation: fadeIn 1s ease 0.5s forwards; }
+        .corner::before, .corner::after { content: ''; position: absolute; background: rgba(139,92,246,0.12); }
+        .corner-tl { top: 40px; left: 40px; } .corner-tl::before { top: 0; left: 0; width: 25px; height: 1px; } .corner-tl::after { top: 0; left: 0; width: 1px; height: 25px; }
+        .corner-tr { top: 40px; right: 40px; } .corner-tr::before { top: 0; right: 0; width: 25px; height: 1px; } .corner-tr::after { top: 0; right: 0; width: 1px; height: 25px; }
+        .corner-bl { bottom: 40px; left: 40px; } .corner-bl::before { bottom: 0; left: 0; width: 25px; height: 1px; } .corner-bl::after { bottom: 0; left: 0; width: 1px; height: 25px; }
+        .corner-br { bottom: 40px; right: 40px; } .corner-br::before { bottom: 0; right: 0; width: 25px; height: 1px; } .corner-br::after { bottom: 0; right: 0; width: 1px; height: 25px; }
+        .border-bottom { position: fixed; bottom: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, transparent, rgba(139,92,246,0.15), rgba(99,102,241,0.15), rgba(139,92,246,0.15), transparent); background-size: 200% 100%; animation: borderSlide 4s linear infinite reverse; }
+
+        /* Title - Top 20% */
+        .title-wrap { position: fixed; top: 18px; left: 50%; transform: translateX(-50%); text-align: center; z-index: 10; pointer-events: none; }
+        .title-line { font-family: 'BigNoodle', Impact, sans-serif; text-transform: uppercase; line-height: 1; letter-spacing: 6px; }
+        .title-battle { font-size: 2.4rem; color: #1a1a1a; opacity: 0; animation: titleDrop 0.6s ease 0.3s forwards; }
+        .title-of { font-size: 2.4rem; color: #1a1a1a; letter-spacing: 10px; margin-top: -2px; opacity: 0; animation: titleDrop 0.6s ease 0.5s forwards; }
+        .title-souls { font-size: 3rem; color: #c62828; letter-spacing: 8px; margin-top: -1px; text-shadow: 0 0 15px rgba(198,40,40,0.12); opacity: 0; animation: titleDrop 0.6s ease 0.7s forwards; }
+        .title-divider { width: 80px; height: 1px; background: linear-gradient(90deg, transparent, rgba(139,92,246,0.25), transparent); margin: 5px auto; opacity: 0; animation: expandIn 0.8s ease 1s forwards; transform: scaleX(0); }
+        .title-tagline { font-size: 0.55rem; letter-spacing: 5px; text-transform: uppercase; color: rgba(80,80,90,0.4); opacity: 0; animation: titleFade 0.8s ease 1.1s forwards; }
+
+        /* ===== MIDDLE ANIMATION AREA ===== */
+        .middle-area {
+            position: fixed;
+            top: 200px;
+            left: 0;
+            right: 0;
+            bottom: 380px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 5;
+            pointer-events: none;
+        }
+
+        .anim-container {
+            width: 900px;
+            height: 100%;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Shared fade for all sections */
+        .anim-section {
+            position: absolute;
+            width: 100%;
+            text-align: center;
+            opacity: 0;
+            transition: opacity 0.8s ease;
+        }
+        .anim-section.active {
+            opacity: 1;
+        }
+
+        /* --- CASTER SECTION --- */
+        .caster-section .caster-label {
+            font-family: 'BigNoodle', Impact, sans-serif;
+            font-size: 0.85rem;
+            letter-spacing: 6px;
+            text-transform: uppercase;
+            color: rgba(80,80,90,0.5);
+            margin-bottom: 12px;
+        }
+        .caster-names {
+            opacity: 0;
+            transform: translateY(12px);
+            transition: opacity 0.7s ease, transform 0.7s ease;
+        }
+        .caster-names.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .caster-name {
+            font-family: 'BigNoodle', Impact, sans-serif;
+            font-size: 2rem;
+            color: #1a1a1a;
+            letter-spacing: 4px;
+            line-height: 1.4;
+        }
+        .caster-amp {
+            font-family: 'BigNoodle', Impact, sans-serif;
+            font-size: 1rem;
+            color: rgba(139,92,246,0.5);
+            letter-spacing: 6px;
+            margin: 2px 0;
+        }
+
+        /* --- SPONSOR SECTION --- */
+        .sponsor-section .sponsor-label {
+            font-family: 'BigNoodle', Impact, sans-serif;
+            font-size: 1rem;
+            letter-spacing: 6px;
+            text-transform: uppercase;
+            color: rgba(80,80,90,0.5);
+            margin-bottom: 18px;
+        }
+
+        .sponsor-card {
+            opacity: 0;
+            transform: translateY(15px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+            margin-bottom: 6px;
+        }
+        .sponsor-card.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .sponsor-name {
+            font-family: 'BigNoodle', Impact, sans-serif;
+            font-size: 2.2rem;
+            color: #1a1a1a;
+            letter-spacing: 3px;
+        }
+        .sponsor-amount {
+            font-family: 'BigNoodle', Impact, sans-serif;
+            font-size: 1.1rem;
+            color: #c62828;
+            letter-spacing: 2px;
+            margin-top: -2px;
+        }
+
+        /* --- GROUP STAGE SECTION --- */
+        .group-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .group-title {
+            font-family: 'BigNoodle', Impact, sans-serif;
+            font-size: 0.85rem;
+            letter-spacing: 6px;
+            text-transform: uppercase;
+            color: rgba(80,80,90,0.5);
+            margin-bottom: 6px;
+        }
+        .group-name-display {
+            font-family: 'BigNoodle', Impact, sans-serif;
+            font-size: 1.6rem;
+            color: #1a1a1a;
+            letter-spacing: 4px;
+            margin-bottom: 14px;
+        }
+        .group-table {
+            opacity: 0;
+            transform: scale(0.95);
+            transition: opacity 0.7s ease, transform 0.7s ease;
+        }
+        .group-table.show {
+            opacity: 1;
+            transform: scale(1);
+        }
+        .group-table table {
+            border-collapse: collapse;
+            width: 650px;
+            font-family: 'BigNoodle', Impact, sans-serif;
+        }
+        .group-table th {
+            font-size: 0.7rem;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: rgba(80,80,90,0.5);
+            padding: 6px 16px;
+            border-bottom: 1px solid rgba(139,92,246,0.12);
+            text-align: center;
+        }
+        .group-table th:first-child {
+            text-align: left;
+            width: 220px;
+        }
+        .group-table td {
+            font-size: 1.15rem;
+            color: #1a1a1a;
+            padding: 10px 16px;
+            text-align: center;
+            letter-spacing: 2px;
+            border-bottom: 1px solid rgba(139,92,246,0.06);
+        }
+        .group-table td:first-child {
+            text-align: left;
+            font-size: 1.25rem;
+            letter-spacing: 3px;
+        }
+        .group-table tr {
+            transition: background 0.3s;
+        }
+        .group-table tr.highlight {
+            background: rgba(139,92,246,0.08);
+            border-radius: 6px;
+        }
+        .group-rank {
+            display: inline-block;
+            width: 26px;
+            height: 26px;
+            line-height: 26px;
+            text-align: center;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            margin-right: 10px;
+            background: rgba(139,92,246,0.1);
+            color: rgba(80,80,90,0.6);
+        }
+        .group-rank.top { background: rgba(198,40,40,0.12); color: #c62828; }
+        .group-winrate { color: rgba(80,80,90,0.5); font-size: 0.95rem; }
+        .group-pts { color: #c62828; font-size: 1.3rem; font-weight: bold; }
+
+        /* --- PLAYER SECTION --- */
+        .player-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .player-section .player-label {
+            font-family: 'BigNoodle', Impact, sans-serif;
+            font-size: 1rem;
+            letter-spacing: 6px;
+            text-transform: uppercase;
+            color: rgba(80,80,90,0.5);
+            margin-bottom: 15px;
+        }
+
+        .player-showcase {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 30px;
+            opacity: 0;
+            transform: scale(0.9);
+            transition: opacity 0.7s ease, transform 0.7s ease;
+        }
+        .player-showcase.show {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .player-hero-img {
+            width: 90px;
+            height: 90px;
+            border-radius: 12px;
+            object-fit: cover;
+            border: 2px solid rgba(139,92,246,0.15);
+            background: rgba(255,255,255,0.5);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+        }
+
+        .player-info { text-align: center; }
+
+        .player-name-display {
+            font-family: 'BigNoodle', Impact, sans-serif;
+            font-size: 2rem;
+            color: #1a1a1a;
+            letter-spacing: 3px;
+        }
+
+        .player-team-tag {
+            font-family: 'BigNoodle', Impact, sans-serif;
+            font-size: 0.75rem;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            margin-top: 2px;
+        }
+        .player-team-tag.blue { color: #1565c0; }
+        .player-team-tag.red { color: #c62828; }
+
+        .player-heroes-label {
+            font-family: 'BigNoodle', Impact, sans-serif;
+            font-size: 0.65rem;
+            letter-spacing: 3px;
+            color: rgba(80,80,90,0.4);
+            margin-top: 4px;
+        }
+
+        /* ===== PREVIOUS DRAFT SIDE PANELS (Game 2+ only) ===== */
+        .prev-draft-panel {
+            position: fixed;
+            top: 140px;
+            bottom: 400px;
+            width: 180px;
+            z-index: 8;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            opacity: 0;
+            transition: opacity 1s ease;
+            pointer-events: none;
+        }
+        .prev-draft-panel.visible { opacity: 1; }
+        .prev-draft-panel.left { left: 15px; }
+        .prev-draft-panel.right { right: 15px; }
+
+        .prev-draft-title {
+            font-family: 'BigNoodle', Impact, sans-serif;
+            font-size: 1.1rem;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            color: rgba(30,30,40,0.55);
+            margin-bottom: 6px;
+        }
+
+        .prev-draft-label {
+            font-family: 'BigNoodle', Impact, sans-serif;
+            font-size: 0.85rem;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: rgba(50,50,60,0.45);
+            margin-top: 6px;
+            margin-bottom: 3px;
+        }
+
+        .prev-hero-card {
+            width: 55px;
+            height: 55px;
+            border-radius: 8px;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(139,92,246,0.15);
+            background: rgba(255,255,255,0.35);
+            backdrop-filter: blur(6px);
+        }
+
+        .prev-hero-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .prev-hero-card img[src=""], .prev-hero-card img:not([src]) {
+            display: none;
+        }
+
+        /* Status overlays */
+        .prev-hero-overlay {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            pointer-events: none;
+        }
+
+        .prev-hero-overlay.active { opacity: 1; }
+
+        .prev-hero-overlay.banned-overlay {
+            background: rgba(198,40,40,0.55);
+            border: 1px solid rgba(198,40,40,0.4);
+        }
+        .prev-hero-overlay.picked-overlay {
+            background: rgba(34,197,94,0.5);
+            border: 1px solid rgba(34,197,94,0.35);
+        }
+        .prev-hero-overlay.stolen-overlay {
+            background: rgba(234,179,8,0.55);
+            border: 1px solid rgba(234,179,8,0.4);
+        }
+
+        .prev-hero-overlay span {
+            font-family: 'BigNoodle', Impact, sans-serif;
+            font-size: 0.6rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            font-weight: bold;
+            text-shadow: 0 1px 4px rgba(0,0,0,0.5);
+        }
+
+        .prev-hero-overlay.banned-overlay span { color: #fff; }
+        .prev-hero-overlay.picked-overlay span { color: #fff; }
+        .prev-hero-overlay.stolen-overlay span { color: #fff; }
+
+        .prev-hero-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            justify-content: center;
+            max-width: 170px;
+        }
+
+        @keyframes gridDrift { from { transform: translate(0,0); } to { transform: translate(60px,60px); } }
+        @keyframes orbFloat { 0%, 100% { transform: translate(0,0) scale(1); } 33% { transform: translate(25px,-35px) scale(1.05); } 66% { transform: translate(-15px,20px) scale(0.97); } }
+        @keyframes particleUp { 0% { transform: translateY(1100px); opacity: 0; } 5% { opacity: 0.5; } 95% { opacity: 0.5; } 100% { transform: translateY(-20px); opacity: 0; } }
+        @keyframes twinkle { 0%, 100% { opacity: 0; transform: scale(0.5); } 50% { opacity: 1; transform: scale(1.2); } }
+        @keyframes streakPass { 0% { opacity: 0; transform: translateX(-120%); } 15% { opacity: 1; } 85% { opacity: 1; } 100% { opacity: 0; transform: translateX(120%); } }
+        @keyframes scanDown { from { top: -1px; } to { top: 1082px; } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes borderSlide { 0% { background-position: 0% 0; } 100% { background-position: 200% 0; } }
+        @keyframes titleDrop { from { opacity: 0; transform: translateY(-8px); filter: blur(3px); } to { opacity: 1; transform: translateY(0); filter: blur(0); } }
+        @keyframes titleFade { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes expandIn { from { transform: scaleX(0); opacity: 0; } to { transform: scaleX(1); opacity: 1; } }
+    </style>
+</head>
+<body>
+    <div class="bg-base"></div>
+    <div class="bg-grid"></div>
+    <div class="noise"></div>
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+    <div class="streak streak-1"></div>
+    <div class="streak streak-2"></div>
+    <div class="scanline"></div>
+    <div class="particles" id="particles"></div>
+    <div class="vignette"></div>
+    <div class="corner corner-tl"></div>
+    <div class="corner corner-tr"></div>
+    <div class="corner corner-bl"></div>
+    <div class="corner corner-br"></div>
+    <div class="border-bottom"></div>
+
+    <!-- Title - Top 20% -->
+    <div class="title-wrap">
+        <div class="title-line title-battle">Battle</div>
+        <div class="title-line title-of">OF</div>
+        <div class="title-line title-souls">Souls</div>
+        <div class="title-divider"></div>
+        <div class="title-tagline">Where Legends Rise</div>
+    </div>
+
+    <!-- Previous Draft Panels (Game 2+ only) -->
+    <div class="prev-draft-panel left" id="prev-panel-left">
+        <div class="prev-draft-title">Game 1 - Blue</div>
+        <div class="prev-draft-label">Picks</div>
+        <div class="prev-hero-row" id="prev-blue-picks"></div>
+        <div class="prev-draft-label">Bans</div>
+        <div class="prev-hero-row" id="prev-blue-bans"></div>
+    </div>
+
+    <div class="prev-draft-panel right" id="prev-panel-right">
+        <div class="prev-draft-title">Game 1 - Red</div>
+        <div class="prev-draft-label">Picks</div>
+        <div class="prev-hero-row" id="prev-red-picks"></div>
+        <div class="prev-draft-label">Bans</div>
+        <div class="prev-hero-row" id="prev-red-bans"></div>
+    </div>
+
+    <!-- Middle Animation Area -->
+    <div class="middle-area">
+        <div class="anim-container">
+
+            <!-- 1. Caster Section -->
+            <div class="anim-section caster-section" id="caster-section">
+                <div class="caster-label">Casted By</div>
+                <div class="caster-names" id="caster-names"></div>
+            </div>
+
+            <!-- 2. Sponsor Section -->
+            <div class="anim-section sponsor-section" id="sponsor-section">
+                <div class="sponsor-label">Sponsored By</div>
+                <div id="sponsor-list"></div>
+            </div>
+
+            <!-- 3. Group Stage Section -->
+            <div class="anim-section group-section" id="group-section">
+                <div class="group-title">Group Stage Standings</div>
+                <div class="group-name-display" id="group-name"></div>
+                <div class="group-table" id="group-table"></div>
+            </div>
+
+            <!-- 4. Player Showcase Section -->
+            <div class="anim-section player-section" id="player-section">
+                <div class="player-label">Player Spotlight</div>
+                <div class="player-showcase" id="player-showcase">
+                    <img class="player-hero-img" id="hero-left" src="" alt="">
+                    <div class="player-info">
+                        <div class="player-name-display" id="player-name"></div>
+                        <div class="player-team-tag" id="player-team"></div>
+                        <div class="player-heroes-label">Most Played Heroes</div>
+                    </div>
+                    <img class="player-hero-img" id="hero-right" src="" alt="">
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // --- Particles ---
+        const pEl = document.getElementById('particles');
+        for (let i = 0; i < 15; i++) {
+            const p = document.createElement('div');
+            p.className = 'particle';
+            p.style.left = Math.random() * 100 + '%';
+            p.style.animationDuration = (12 + Math.random() * 15) + 's';
+            p.style.animationDelay = -(Math.random() * 20) + 's';
+            const s = 1.5 + Math.random() * 2;
+            p.style.width = s + 'px'; p.style.height = s + 'px';
+            pEl.appendChild(p);
+        }
+        for (let i = 0; i < 30; i++) {
+            const d = document.createElement('div');
+            d.className = 'particle-dot';
+            d.style.left = Math.random() * 100 + '%';
+            d.style.top = Math.random() * 100 + '%';
+            d.style.animationDuration = (3 + Math.random() * 5) + 's';
+            d.style.animationDelay = -(Math.random() * 6) + 's';
+            pEl.appendChild(d);
+        }
+
+        // --- Data ---
+        let bgData = { casters: [], sponsors: [], groups: [], activeGroup: 0, bluePlayers: [], redPlayers: [] };
+        let currentPlayerIndex = 0;
+        let allPlayers = [];
+
+        // Previous draft data
+        let prevDraft = null;
+        let currentDraft = null;
+        let gameNumber = 1;
+
+        function buildPlayerList() {
+            allPlayers = [];
+            (bgData.bluePlayers || []).forEach(p => {
+                if (p.name && !p.name.match(/^Player \d$/)) {
+                    allPlayers.push({ ...p, team: 'blue', teamName: 'Blue Side' });
+                }
+            });
+            (bgData.redPlayers || []).forEach(p => {
+                if (p.name && !p.name.match(/^Player \d$/)) {
+                    allPlayers.push({ ...p, team: 'red', teamName: 'Red Side' });
+                }
+            });
+        }
+
+        async function loadBgData() {
+            try {
+                const res = await fetch('/api/draftbgdata');
+                bgData = await res.json();
+                buildPlayerList();
+            } catch (e) { console.error('Error loading bg data:', e); }
+        }
+
+        // ===== PREVIOUS DRAFT SYSTEM =====
+        async function loadPrevDraft() {
+            try {
+                const [prevRes, matchRes] = await Promise.all([
+                    fetch('/api/previousdraft'),
+                    fetch('/api/matchdata')
+                ]);
+                prevDraft = await prevRes.json();
+                const matchData = await matchRes.json();
+                gameNumber = parseInt(matchData.game_number) || 1;
+            } catch (e) { console.error('Error loading prev draft:', e); }
+        }
+
+        async function loadCurrentDraft() {
+            try {
+                const res = await fetch('/api/matchdraft');
+                currentDraft = await res.json();
+            } catch (e) {}
+        }
+
+        function getHeroStatus(heroImg, prevSide) {
+            // Check if this hero appears in the CURRENT draft
+            if (!currentDraft || !currentDraft.draftdata || !heroImg) return null;
+
+            const cd = currentDraft.draftdata;
+            const allCurrentBans = [
+                ...(cd.blueside.ban || []).map(b => b.hero),
+                ...(cd.redside.ban || []).map(b => b.hero)
+            ].filter(h => h);
+
+            const blueCurrentPicks = (cd.blueside.pick || []).map(p => p.hero).filter(h => h);
+            const redCurrentPicks = (cd.redside.pick || []).map(p => p.hero).filter(h => h);
+
+            // Check if banned in current match
+            if (allCurrentBans.includes(heroImg)) return 'banned';
+
+            // Check if picked by same team (re-picked)
+            if (prevSide === 'blue' && blueCurrentPicks.includes(heroImg)) return 'picked';
+            if (prevSide === 'red' && redCurrentPicks.includes(heroImg)) return 'picked';
+
+            // Check if picked by opposite team (stolen)
+            if (prevSide === 'blue' && redCurrentPicks.includes(heroImg)) return 'stolen';
+            if (prevSide === 'red' && blueCurrentPicks.includes(heroImg)) return 'stolen';
+
+            return null;
+        }
+
+        function renderPrevDraftPanels() {
+            const leftPanel = document.getElementById('prev-panel-left');
+            const rightPanel = document.getElementById('prev-panel-right');
+
+            // Only show on Game 2+
+            if (gameNumber < 2 || !prevDraft || !prevDraft.draftdata) {
+                leftPanel.classList.remove('visible');
+                rightPanel.classList.remove('visible');
+                return;
+            }
+
+            const pd = prevDraft.draftdata;
+
+            // Render blue side (left)
+            renderPrevHeroes('prev-blue-picks', pd.blueside.pick || [], 'blue');
+            renderPrevHeroes('prev-blue-bans', pd.blueside.ban || [], 'blue');
+
+            // Render red side (right)
+            renderPrevHeroes('prev-red-picks', pd.redside.pick || [], 'red');
+            renderPrevHeroes('prev-red-bans', pd.redside.ban || [], 'red');
+
+            leftPanel.classList.add('visible');
+            rightPanel.classList.add('visible');
+        }
+
+        function renderPrevHeroes(containerId, heroes, side) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+
+            heroes.forEach(h => {
+                if (!h.hero) return;
+                const card = document.createElement('div');
+                card.className = 'prev-hero-card';
+
+                const img = document.createElement('img');
+                img.src = h.hero;
+                card.appendChild(img);
+
+                // Status overlay
+                const status = getHeroStatus(h.hero, side);
+                if (status) {
+                    const overlay = document.createElement('div');
+                    overlay.className = `prev-hero-overlay ${status}-overlay active`;
+                    overlay.innerHTML = `<span>${status}</span>`;
+                    card.appendChild(overlay);
+                }
+
+                container.appendChild(card);
+            });
+        }
+
+        function connectWS() {
+            const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
+            const ws = new WebSocket(`${protocol}://${window.location.host}`);
+            ws.onmessage = (event) => {
+                try {
+                    const msg = JSON.parse(event.data);
+                    if (msg.type === 'draftbgdata_update' && msg.data) {
+                        bgData = msg.data;
+                        buildPlayerList();
+                    }
+                    // Live update when current draft changes
+                    if (msg.type === 'draftdata_update' && msg.data) {
+                        if (!currentDraft) currentDraft = {};
+                        currentDraft.draftdata = msg.data;
+                        renderPrevDraftPanels();
+                    }
+                    // Match data update (game number change)
+                    if (msg.type === 'matchdata_update' && msg.data) {
+                        gameNumber = parseInt(msg.data.game_number) || 1;
+                        renderPrevDraftPanels();
+                    }
+                    // Previous draft updated from control panel
+                    if (msg.type === 'previousdraft_update' && msg.data) {
+                        prevDraft = msg.data;
+                        renderPrevDraftPanels();
+                    }
+                } catch (e) {}
+            };
+            ws.onclose = () => setTimeout(connectWS, 3000);
+        }
+
+        function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+        function hideAll() {
+            document.querySelectorAll('.anim-section').forEach(s => s.classList.remove('active'));
+        }
+
+        // ===== 1. CASTER ANIMATION =====
+        async function showCasters() {
+            const casters = bgData.casters || [];
+            if (casters.length === 0) return;
+
+            hideAll();
+            const section = document.getElementById('caster-section');
+            const namesDiv = document.getElementById('caster-names');
+
+            // Build caster names HTML
+            let html = '';
+            casters.forEach((name, i) => {
+                html += `<div class="caster-name">${name}</div>`;
+                if (i < casters.length - 1) {
+                    html += `<div class="caster-amp">&</div>`;
+                }
+            });
+            namesDiv.innerHTML = html;
+            namesDiv.classList.remove('show');
+
+            section.classList.add('active');
+            await sleep(200);
+            namesDiv.classList.add('show');
+
+            // Hold for 5 seconds
+            await sleep(5000);
+
+            namesDiv.classList.remove('show');
+            await sleep(800);
+            section.classList.remove('active');
+        }
+
+        // ===== 2. SPONSOR ANIMATION (one at a time) =====
+        async function showSponsors() {
+            const sponsors = bgData.sponsors || [];
+            if (sponsors.length === 0) return;
+
+            hideAll();
+            const section = document.getElementById('sponsor-section');
+            const list = document.getElementById('sponsor-list');
+
+            section.classList.add('active');
+
+            for (let i = 0; i < sponsors.length; i++) {
+                list.innerHTML = '';
+                const card = document.createElement('div');
+                card.className = 'sponsor-card';
+                card.innerHTML = `
+                    <div class="sponsor-name">${sponsors[i].name}</div>
+                    <div class="sponsor-amount">${sponsors[i].amount}</div>
+                `;
+                list.appendChild(card);
+
+                await sleep(50);
+                card.classList.add('show');
+                await sleep(5000);
+                card.classList.remove('show');
+                await sleep(800);
+            }
+
+            section.classList.remove('active');
+        }
+
+        // ===== 3. GROUP STAGE ANIMATION =====
+        async function showGroupStage() {
+            const groups = bgData.groups || [];
+            const activeIdx = bgData.activeGroup || 0;
+            if (groups.length === 0 || !groups[activeIdx]) return;
+
+            hideAll();
+            const section = document.getElementById('group-section');
+            const groupNameEl = document.getElementById('group-name');
+            const tableDiv = document.getElementById('group-table');
+
+            const group = groups[activeIdx];
+            groupNameEl.textContent = group.name;
+
+            // Sort teams by points (desc), then wins (desc)
+            const sorted = [...group.teams].sort((a, b) => {
+                if (b.points !== a.points) return b.points - a.points;
+                return b.wins - a.wins;
+            });
+
+            let tableHTML = `<table>
+                <tr>
+                    <th>Team</th>
+                    <th>W</th>
+                    <th>L</th>
+                    <th>Win Rate</th>
+                    <th>Pts</th>
+                </tr>`;
+
+            sorted.forEach((team, i) => {
+                const total = team.wins + team.losses;
+                const winrate = total > 0 ? Math.round((team.wins / total) * 100) + '%' : '-';
+                const rankClass = i < 2 ? 'top' : '';
+                tableHTML += `<tr>
+                    <td><span class="group-rank ${rankClass}">${i + 1}</span>${team.name}</td>
+                    <td>${team.wins}</td>
+                    <td>${team.losses}</td>
+                    <td class="group-winrate">${winrate}</td>
+                    <td class="group-pts">${team.points}</td>
+                </tr>`;
+            });
+            tableHTML += '</table>';
+            tableDiv.innerHTML = tableHTML;
+            tableDiv.classList.remove('show');
+
+            section.classList.add('active');
+            await sleep(300);
+            tableDiv.classList.add('show');
+
+            // Hold for 7 seconds (table needs more reading time)
+            await sleep(7000);
+
+            tableDiv.classList.remove('show');
+            await sleep(800);
+            section.classList.remove('active');
+        }
+
+        // ===== 4. PLAYER SPOTLIGHT ANIMATION =====
+        async function showPlayer(index) {
+            if (allPlayers.length === 0) return;
+
+            hideAll();
+            const section = document.getElementById('player-section');
+            const showcase = document.getElementById('player-showcase');
+            showcase.classList.remove('show');
+
+            const player = allPlayers[index % allPlayers.length];
+
+            document.getElementById('player-name').textContent = player.name;
+            const teamTag = document.getElementById('player-team');
+            teamTag.textContent = player.teamName;
+            teamTag.className = 'player-team-tag ' + player.team;
+
+            const heroLeft = document.getElementById('hero-left');
+            const heroRight = document.getElementById('hero-right');
+
+            heroLeft.style.display = player.hero1 ? '' : 'none';
+            if (player.hero1) heroLeft.src = player.hero1;
+
+            heroRight.style.display = player.hero2 ? '' : 'none';
+            if (player.hero2) heroRight.src = player.hero2;
+
+            section.classList.add('active');
+            await sleep(300);
+            showcase.classList.add('show');
+
+            // Hold for 5 seconds
+            await sleep(5000);
+
+            showcase.classList.remove('show');
+            await sleep(600);
+            section.classList.remove('active');
+        }
+
+        // ===== MAIN LOOP =====
+        // Order: Casters -> Sponsors (one by one) -> Group Standings -> Players (one by one) -> repeat
+        async function animationLoop() {
+            await loadBgData();
+            await loadPrevDraft();
+            await loadCurrentDraft();
+            connectWS();
+            renderPrevDraftPanels();
+
+            while (true) {
+                // 1. Casters
+                await showCasters();
+                await sleep(600);
+
+                // 2. Sponsors one by one
+                await showSponsors();
+                await sleep(600);
+
+                // 3. Group Stage standings
+                await showGroupStage();
+                await sleep(600);
+
+                // 4. Players one by one
+                if (allPlayers.length > 0) {
+                    for (let i = 0; i < allPlayers.length; i++) {
+                        await showPlayer(i);
+                        await sleep(400);
+                    }
+                }
+
+                // If nothing configured, wait before retrying
+                const hasContent = (bgData.casters && bgData.casters.length > 0) ||
+                    (bgData.sponsors && bgData.sponsors.length > 0) ||
+                    (bgData.groups && bgData.groups.length > 0) ||
+                    allPlayers.length > 0;
+
+                if (!hasContent) await sleep(3000);
+
+                await sleep(1000);
+            }
+        }
+
+        animationLoop();
+    </script>
+</body>
+</html>

@@ -1,0 +1,1346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Battle of Souls - Admin</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+            --bg: #0d0f14;
+            --card: #1a1c22;
+            --border: #2a2c34;
+            --text: #e8e8e8;
+            --muted: #666;
+            --blue: #1e88e5;
+            --red: #e53935;
+            --purple: #8b5cf6;
+            --green: #22c55e;
+        }
+        body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+
+        /* Tabs */
+        .tab-bar {
+            position: sticky; top: 0; z-index: 100;
+            display: flex; background: rgba(13,15,20,0.95); backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border); padding: 0 20px;
+        }
+        .tab-btn {
+            padding: 14px 22px; border: none; background: none; color: var(--muted);
+            font-size: 13px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase;
+            cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s;
+        }
+        .tab-btn:hover { color: var(--text); }
+        .tab-btn.active { color: var(--purple); border-bottom-color: var(--purple); }
+        .tab-panel { display: none; padding: 25px; max-width: 800px; margin: 0 auto; }
+        .tab-panel.active { display: block; }
+
+        h1 { font-size: 22px; font-weight: 700; letter-spacing: 3px; text-align: center; margin-bottom: 25px; color: var(--purple); text-transform: uppercase; }
+        h2 { font-size: 15px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(--purple); margin-bottom: 12px; }
+        .section { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 18px; }
+        .row { display: flex; gap: 10px; align-items: center; margin-bottom: 10px; }
+        label { font-size: 13px; color: var(--muted); letter-spacing: 1px; min-width: 70px; }
+
+        input[type="text"], input[type="number"] {
+            flex: 1; padding: 10px 14px; background: var(--bg); border: 1px solid var(--border);
+            border-radius: 8px; color: var(--text); font-size: 14px; outline: none;
+        }
+        input:focus { border-color: var(--purple); }
+        select { padding: 10px 14px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 14px; outline: none; }
+        select:focus { border-color: var(--purple); }
+
+        button { padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; transition: all 0.2s; }
+        .btn-green { background: var(--green); color: #000; } .btn-green:hover { background: #16a34a; }
+        .btn-red { background: var(--red); color: #fff; } .btn-red:hover { background: #c62828; }
+        .btn-purple { background: var(--purple); color: #fff; } .btn-purple:hover { background: #7c3aed; }
+        .btn-muted { background: var(--border); color: var(--text); } .btn-muted:hover { background: #3a3c44; }
+        .btn-add { background: var(--purple); color: white; font-size: 12px; padding: 8px 16px; }
+        .btn-remove { background: var(--red); color: white; padding: 8px 12px; font-size: 12px; }
+
+        .status-msg { text-align: center; margin-top: 8px; font-size: 12px; color: var(--green); opacity: 0; transition: opacity 0.3s; }
+        .status-msg.show { opacity: 1; }
+
+        /* Draft status */
+        .status-bar { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 10px; }
+        .status-label { font-size: 12px; color: var(--muted); letter-spacing: 1px; }
+        .status-value { font-size: 14px; font-weight: 600; letter-spacing: 1px; }
+        .status-value.live { color: var(--green); } .status-value.waiting { color: var(--purple); }
+        .status-value.idle { color: var(--muted); } .status-value.done { color: var(--blue); }
+
+        .phase-info { text-align: center; padding: 14px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 10px; }
+        .phase-timer { font-size: 44px; font-weight: 800; letter-spacing: 3px; }
+        .phase-timer.urgent { color: var(--red); }
+        .phase-text { font-size: 13px; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; margin-top: 4px; }
+
+        .controls { display: flex; gap: 8px; flex-wrap: wrap; }
+        .controls button { flex: 1; min-width: 100px; }
+
+        .ready-dots { display: flex; gap: 20px; justify-content: center; margin: 8px 0; }
+        .ready-item { display: flex; align-items: center; gap: 6px; font-size: 13px; }
+        .rdot { width: 10px; height: 10px; border-radius: 50%; background: var(--border); }
+        .rdot.ready { background: var(--green); }
+
+        /* Links */
+        .link-box { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+        .link-label { font-size: 11px; letter-spacing: 1px; text-transform: uppercase; font-weight: 600; min-width: 40px; }
+        .link-label.blue { color: var(--blue); } .link-label.red { color: var(--red); }
+        .link-url { flex: 1; font-size: 12px; color: var(--text); word-break: break-all; font-family: monospace; }
+        .copy-btn { padding: 5px 12px; font-size: 10px; background: var(--border); color: var(--text); border: none; border-radius: 5px; cursor: pointer; }
+        .copy-btn:hover { background: var(--purple); }
+
+        /* Draft display */
+        .draft-display { display: flex; gap: 14px; margin-top: 10px; }
+        .draft-col { flex: 1; }
+        .draft-col-title { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 5px; font-weight: 600; }
+        .draft-col-title.blue { color: var(--blue); } .draft-col-title.red { color: var(--red); }
+        .draft-hero-slot { display: flex; align-items: center; gap: 6px; padding: 5px 8px; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; margin-bottom: 3px; font-size: 11px; }
+        .draft-hero-slot img { width: 24px; height: 24px; border-radius: 5px; object-fit: cover; }
+        .draft-hero-slot .slot-type { font-size: 8px; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); min-width: 28px; }
+
+        /* BG Control items */
+        .team-label { font-size: 12px; letter-spacing: 2px; text-transform: uppercase; padding: 5px 12px; border-radius: 5px; display: inline-block; margin-bottom: 8px; font-weight: 600; }
+        .team-label.blue { background: rgba(30,136,229,0.12); color: var(--blue); }
+        .team-label.red { background: rgba(229,57,53,0.12); color: var(--red); }
+        .player-num { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; background: rgba(139,92,246,0.15); border-radius: 5px; font-size: 11px; font-weight: bold; color: var(--purple); flex-shrink: 0; }
+        .player-row { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
+        .player-row input { flex: 1; }
+
+        /* Hero search dropdown */
+        .hero-select-wrap { flex: 1; position: relative; }
+        .hero-search { width: 100%; padding: 10px 14px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 14px; outline: none; }
+        .hero-search:focus { border-color: var(--purple); }
+        .hero-dropdown { display: none; position: absolute; top: 100%; left: 0; right: 0; max-height: 180px; overflow-y: auto; background: var(--card); border: 1px solid var(--border); border-radius: 0 0 8px 8px; z-index: 100; }
+        .hero-dropdown.open { display: block; }
+        .hero-option { display: flex; align-items: center; gap: 8px; padding: 7px 10px; cursor: pointer; font-size: 12px; transition: background 0.15s; }
+        .hero-option:hover { background: rgba(139,92,246,0.2); }
+        .hero-option img { width: 26px; height: 26px; border-radius: 5px; object-fit: cover; }
+
+        /* Group stage */
+        .group-tabs { display: flex; gap: 6px; margin-bottom: 12px; }
+        .group-tab { padding: 6px 16px; border-radius: 6px; border: 1px solid var(--border); background: transparent; color: var(--muted); font-size: 12px; font-weight: 600; cursor: pointer; }
+        .group-tab.active { background: var(--purple); color: white; border-color: var(--purple); }
+        .group-team-row { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
+        .group-team-row input.tname { flex: 2; }
+        .group-team-row input[type="number"] { width: 55px; text-align: center; }
+        .group-field { display: flex; flex-direction: column; gap: 2px; align-items: center; }
+        .group-field label { font-size: 9px; min-width: auto; }
+
+        /* Post-draft assignment */
+        .assign-section { display: none; }
+        .assign-section.visible { display: block; }
+        .assign-row { display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 5px; }
+        .assign-hero-img { width: 36px; height: 36px; border-radius: 6px; object-fit: cover; flex-shrink: 0; }
+        .assign-hero-name { font-size: 13px; font-weight: 600; min-width: 80px; }
+        .assign-select { flex: 1; padding: 8px 10px; background: var(--card); border: 1px solid var(--border); border-radius: 6px; color: var(--text); font-size: 13px; outline: none; }
+        .assign-role { width: 90px; padding: 8px 8px; background: var(--card); border: 1px solid var(--border); border-radius: 6px; color: var(--text); font-size: 12px; outline: none; flex-shrink: 0; }
+        .assign-arrow { color: var(--muted); flex-shrink: 0; }
+        .swap-btn { padding: 5px 10px; background: rgba(139,92,246,0.15); border: 1px solid rgba(139,92,246,0.3); color: var(--purple); border-radius: 5px; cursor: pointer; font-size: 10px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; flex-shrink: 0; }
+        .swap-btn:hover { background: rgba(139,92,246,0.25); }
+        .swap-btn.active { background: var(--purple); color: white; }
+
+        .draft-done-btn { width: 100%; padding: 14px; background: var(--green); color: #000; border: none; border-radius: 8px; font-size: 15px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; margin-top: 10px; display: none; }
+        .draft-done-btn.visible { display: block; }
+        .draft-done-btn:hover { background: #16a34a; }
+        .lane-select { width: 80px; padding: 8px 6px; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; color: var(--text); font-size: 12px; outline: none; flex-shrink: 0; }
+        .lane-select:focus { border-color: var(--purple); }
+        .nick-input { flex: 1; }
+
+        /* Player reorder buttons */
+        .reorder-btn {
+            width: 24px; height: 24px; padding: 0; border: 1px solid var(--border);
+            background: var(--bg); color: var(--muted); border-radius: 4px; cursor: pointer;
+            font-size: 12px; display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+        }
+        .reorder-btn:hover { background: rgba(139,92,246,0.2); color: var(--purple); border-color: var(--purple); }
+        .reorder-btn:disabled { opacity: 0.2; cursor: default; }
+        .reorder-btn:disabled:hover { background: var(--bg); color: var(--muted); border-color: var(--border); }
+        .player-divider {
+            border: none; border-top: 1px dashed rgba(139,92,246,0.3); margin: 6px 0;
+            position: relative;
+        }
+        .player-divider::after {
+            content: 'SUBS'; position: absolute; top: -7px; right: 10px;
+            background: var(--card); padding: 0 8px; font-size: 9px; letter-spacing: 2px;
+            color: rgba(139,92,246,0.5);
+        }
+        .add-player-btn {
+            width: 100%; padding: 6px; margin-top: 4px; background: none;
+            border: 1px dashed var(--border); border-radius: 6px; color: var(--muted);
+            cursor: pointer; font-size: 11px;
+        }
+        .add-player-btn:hover { border-color: var(--purple); color: var(--purple); }
+
+        /* Autocomplete dropdown */
+        .ac-wrap { position: relative; flex: 1; display: flex; }
+        .ac-wrap input { width: 100%; }
+        .ac-dropdown {
+            display: none; position: absolute; top: 100%; left: 0; right: 0;
+            background: var(--card); border: 1px solid var(--border); border-radius: 0 0 8px 8px;
+            max-height: 200px; overflow-y: auto; z-index: 200;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+        }
+        .ac-dropdown.open { display: block; }
+        .ac-dropdown .ac-item {
+            padding: 8px 12px; cursor: pointer; font-size: 12px;
+            border-bottom: 1px solid rgba(255,255,255,0.03);
+            display: flex; align-items: center; gap: 8px;
+        }
+        .ac-dropdown .ac-item:hover { background: rgba(139,92,246,0.15); }
+        .ac-dropdown .ac-item .ac-meta {
+            color: var(--muted); font-size: 10px; margin-left: auto;
+        }
+        .ac-dropdown .ac-item .ac-logo {
+            width: 20px; height: 20px; border-radius: 4px; object-fit: cover;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Tab Navigation -->
+<div class="tab-bar">
+    <button class="tab-btn active" onclick="switchTab('setup')">Setup</button>
+    <button class="tab-btn" onclick="switchTab('draft')">Draft</button>
+    <button class="tab-btn" onclick="switchTab('broadcast')">Broadcast</button>
+    <button class="tab-btn" onclick="switchTab('mvp')">MVP</button>
+    <button class="tab-btn" onclick="switchTab('match')">Match</button>
+</div>
+
+<!-- ==================== TAB 1: SETUP ==================== -->
+<div class="tab-panel active" id="tab-setup">
+    <h1>Draft Setup</h1>
+
+    <div class="section">
+        <h2>Teams</h2>
+        <div class="row"><label>Blue:</label><input type="text" id="blue-team-input" placeholder="Blue Team Name" value="Blue Team"></div>
+        <div class="row"><label>Score:</label><input type="text" id="blue-score-input" placeholder="0" style="max-width:60px;text-align:center;"><label style="min-width:40px;">Logo:</label><input type="file" id="blue-logo-input" accept="image/*" onchange="handleLogoUpload('blue',this)" style="flex:1;padding:6px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:12px;"></div>
+        <div style="height:8px;border-bottom:1px solid var(--border);margin-bottom:10px;"></div>
+        <div class="row"><label>Red:</label><input type="text" id="red-team-input" placeholder="Red Team Name" value="Red Team"></div>
+        <div class="row"><label>Score:</label><input type="text" id="red-score-input" placeholder="0" style="max-width:60px;text-align:center;"><label style="min-width:40px;">Logo:</label><input type="file" id="red-logo-input" accept="image/*" onchange="handleLogoUpload('red',this)" style="flex:1;padding:6px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:12px;"></div>
+        <div style="height:8px;border-bottom:1px solid var(--border);margin-bottom:10px;"></div>
+        <div class="row">
+            <button class="btn-green" onclick="generateLinks()" style="flex:3">Generate Draft Links</button>
+            <button class="btn-purple" onclick="switchTeams()" style="flex:1">Switch Teams</button>
+        </div>
+
+        <div id="links-container" style="display:none;margin-top:14px;">
+            <div class="link-box"><span class="link-label blue">Blue</span><span class="link-url" id="blue-link"></span><button class="copy-btn" onclick="copyText('blue-link')">Copy</button></div>
+            <div class="link-box"><span class="link-label red">Red</span><span class="link-url" id="red-link"></span><button class="copy-btn" onclick="copyText('red-link')">Copy</button></div>
+
+            <div style="margin-top:12px;padding:12px;background:var(--bg);border:1px solid var(--border);border-radius:8px;">
+                <label style="font-size:11px;display:block;margin-bottom:5px;">Ngrok URL (for remote captains):</label>
+                <input type="text" id="ngrok-input" placeholder="https://xxxx.ngrok.io" oninput="updateNgrokLinks()" style="width:100%;font-family:monospace;">
+                <div id="ngrok-links" style="margin-top:8px;display:none;">
+                    <div class="link-box"><span class="link-label blue">Blue</span><span class="link-url" id="ngrok-blue-link"></span><button class="copy-btn" onclick="copyText('ngrok-blue-link')">Copy</button></div>
+                    <div class="link-box"><span class="link-label red">Red</span><span class="link-url" id="ngrok-red-link"></span><button class="copy-btn" onclick="copyText('ngrok-red-link')">Copy</button></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Players -->
+    <div class="section">
+        <h2>Players & Lanes</h2>
+        <div style="background:rgba(139,92,246,0.1);border:1px solid rgba(139,92,246,0.25);border-radius:8px;padding:8px 12px;margin-bottom:12px;font-size:11px;color:rgba(168,85,247,0.9);">
+            &#9432; Only the <b>top 5</b> players will appear on stream. Use the <b>arrows</b> to reorder. Subs stay below the line.
+        </div>
+        <div class="team-label blue">Blue Side</div>
+        <div id="setup-blue-players"></div>
+        <div style="margin-top:14px;"><div class="team-label red">Red Side</div><div id="setup-red-players"></div></div>
+        <button class="btn-green" onclick="saveMatchSetup()" style="width:100%;margin-top:12px;padding:12px;">Save Team & Player Info</button>
+        <div class="status-msg" id="setup-status">Saved!</div>
+    </div>
+
+    <div class="section">
+        <h2>Match Settings</h2>
+        <div class="row">
+            <label>Game #:</label>
+            <select id="game-number-select" onchange="updateGameNumber(this.value)">
+                <option value="1">Game 1</option><option value="2">Game 2</option><option value="3">Game 3</option><option value="4">Game 4</option><option value="5">Game 5</option>
+            </select>
+            <span style="font-size:11px;color:var(--muted);">Previous draft panels show on Game 2+</span>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== TAB 2: DRAFT ==================== -->
+<div class="tab-panel" id="tab-draft">
+    <h1>Live Draft</h1>
+
+    <div class="section">
+        <div class="status-bar"><span class="status-label">Status</span><span class="status-value" id="status-val">Idle</span></div>
+        <div class="ready-dots">
+            <div class="ready-item"><div class="rdot" id="admin-blue-dot"></div><span id="admin-blue-name" style="color:var(--blue)">Blue</span></div>
+            <div class="ready-item"><div class="rdot" id="admin-red-dot"></div><span id="admin-red-name" style="color:var(--red)">Red</span></div>
+        </div>
+        <div class="phase-info">
+            <div class="phase-timer" id="admin-timer">60</div>
+            <div class="phase-text" id="admin-phase">Waiting</div>
+        </div>
+        <div class="controls">
+            <button class="btn-purple" onclick="pauseResume()">Pause / Resume</button>
+            <button class="btn-muted" onclick="advancePhase()">Skip Phase</button>
+            <button class="btn-red" onclick="resetDraft()">Reset</button>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>Picks & Bans</h2>
+        <div class="draft-display">
+            <div class="draft-col"><div class="draft-col-title blue" id="live-blue-name">Blue</div><div id="live-blue-bans"></div><div style="height:6px"></div><div id="live-blue-picks"></div></div>
+            <div class="draft-col"><div class="draft-col-title red" id="live-red-name">Red</div><div id="live-red-bans"></div><div style="height:6px"></div><div id="live-red-picks"></div></div>
+        </div>
+        <button class="draft-done-btn" id="review-draft-btn" onclick="openAssignment()">Review & Assign Players</button>
+    </div>
+
+    <!-- Post-Draft Assignment -->
+    <div class="section assign-section" id="assign-section">
+        <h2>Player & Role Assignment</h2>
+        <p style="font-size:11px;color:var(--muted);margin-bottom:14px;">Assign heroes to players. Swap if players traded heroes.</p>
+        <div style="margin-bottom:14px;"><div class="team-label blue" id="assign-blue-title">Blue</div><div id="assign-blue-rows"></div></div>
+        <div style="margin-bottom:14px;"><div class="team-label red" id="assign-red-title">Red</div><div id="assign-red-rows"></div></div>
+        <div class="controls">
+            <button class="btn-green" onclick="finalizeDraft()">Finalize & Save</button>
+            <button class="btn-purple" onclick="archiveDraft()">Finalize & Archive</button>
+        </div>
+        <div class="status-msg" id="finalize-status">Saved!</div>
+    </div>
+</div>
+
+<!-- ==================== TAB 3: BROADCAST ==================== -->
+<div class="tab-panel" id="tab-broadcast">
+    <h1>Broadcast Settings</h1>
+
+    <!-- Casters -->
+    <div class="section">
+        <h2>Casters</h2>
+        <div id="caster-list"></div>
+        <button class="btn-add" onclick="addCaster()">+ Add Caster</button>
+    </div>
+
+    <!-- Sponsors -->
+    <div class="section">
+        <h2>Sponsors</h2>
+        <div id="sponsor-list"></div>
+        <button class="btn-add" onclick="addSponsor()">+ Add Sponsor</button>
+    </div>
+
+    <!-- Group Stage -->
+    <div class="section">
+        <h2>Group Stage</h2>
+        <div class="group-tabs" id="group-tabs"></div>
+        <button class="btn-add" onclick="addGroup()" style="margin-bottom:12px;">+ Add Group</button>
+        <div id="group-content"></div>
+        <div class="row" style="margin-top:12px;padding:10px;background:var(--bg);border:1px solid var(--border);border-radius:8px;">
+            <label style="font-size:11px;">Show on stream:</label>
+            <select id="active-group-select" onchange="bgData.activeGroup = parseInt(this.value)"></select>
+        </div>
+    </div>
+
+    <!-- Player Spotlight -->
+    <div class="section">
+        <h2>Player Spotlight (Most Played Heroes)</h2>
+        <div class="team-label blue">Blue Side</div>
+        <div id="blue-players"></div>
+        <div style="margin-top:14px;"><div class="team-label red">Red Side</div><div id="red-players"></div></div>
+    </div>
+
+    <button class="btn-green" onclick="saveBgData()" style="width:100%;padding:14px;font-size:14px;">Save Broadcast Settings</button>
+    <div class="status-msg" id="bg-status">Saved!</div>
+</div>
+
+<!-- ==================== TAB: MVP ==================== -->
+<div class="tab-panel" id="tab-mvp">
+    <h1>MVP Display</h1>
+
+    <div class="section">
+        <h2>Player Info</h2>
+        <div class="row">
+            <label>Side:</label>
+            <select id="mvp-side" style="max-width:120px;">
+                <option value="blue">Blue</option>
+                <option value="red">Red</option>
+            </select>
+        </div>
+        <div class="row">
+            <label>Name:</label>
+            <input type="text" id="mvp-nickname" placeholder="Player Nickname">
+        </div>
+        <div class="row">
+            <label>Role:</label>
+            <select id="mvp-role" style="max-width:140px;">
+                <option value="gold">Gold</option>
+                <option value="junggle">Jungle</option>
+                <option value="mid">Mid</option>
+                <option value="roam">Roam</option>
+                <option value="exp">Exp</option>
+            </select>
+        </div>
+        <div class="row">
+            <label>Hero:</label>
+            <div class="hero-select-wrap" style="flex:1;">
+                <input type="text" class="hero-search" id="mvp-hero-search" placeholder="Search hero..." onfocus="openMvpHeroDrop()" oninput="filterMvpHeroDrop()">
+                <div class="hero-dropdown" id="mvp-hero-dropdown"></div>
+            </div>
+        </div>
+        <div id="mvp-hero-preview" style="display:none;margin-top:8px;padding:8px 12px;background:var(--bg);border:1px solid var(--border);border-radius:8px;display:none;">
+            <img id="mvp-hero-preview-img" style="width:50px;height:50px;border-radius:6px;object-fit:cover;vertical-align:middle;margin-right:10px;">
+            <span id="mvp-hero-preview-name" style="font-size:13px;font-weight:600;"></span>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>Stats</h2>
+        <div class="row">
+            <label>Level:</label>
+            <input type="number" id="mvp-lvl" placeholder="15" min="1" max="15" style="max-width:80px;">
+        </div>
+        <div class="row">
+            <label>Kills:</label><input type="number" id="mvp-kills" placeholder="0" min="0" style="max-width:80px;">
+            <label>Deaths:</label><input type="number" id="mvp-deaths" placeholder="0" min="0" style="max-width:80px;">
+            <label>Assists:</label><input type="number" id="mvp-assists" placeholder="0" min="0" style="max-width:80px;">
+        </div>
+        <div class="row">
+            <label>Gold:</label>
+            <input type="number" id="mvp-gold" placeholder="12000" min="0">
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>Spell & Items</h2>
+        <div class="row">
+            <label>Spell:</label>
+            <input type="text" id="mvp-spell" placeholder="e.g. flicker, retri, purify">
+        </div>
+        <div class="row">
+            <label>Item 1:</label><input type="text" id="mvp-item1" placeholder="Item name" style="flex:1;">
+            <label>Item 2:</label><input type="text" id="mvp-item2" placeholder="Item name" style="flex:1;">
+        </div>
+        <div class="row">
+            <label>Item 3:</label><input type="text" id="mvp-item3" placeholder="Item name" style="flex:1;">
+            <label>Item 4:</label><input type="text" id="mvp-item4" placeholder="Item name" style="flex:1;">
+        </div>
+        <div class="row">
+            <label>Item 5:</label><input type="text" id="mvp-item5" placeholder="Item name" style="flex:1;">
+            <label>Item 6:</label><input type="text" id="mvp-item6" placeholder="Item name" style="flex:1;">
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>Quick Fill from Match</h2>
+        <p style="font-size:11px;color:var(--muted);margin-bottom:10px;">Select a player from the current match to auto-fill their stats.</p>
+        <div class="row">
+            <select id="mvp-quick-fill" style="flex:1;" onchange="quickFillMvp(this.value)">
+                <option value="">-- Select Player --</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="row" style="gap:8px;">
+        <button class="btn-green" onclick="saveMvp()" style="flex:3;padding:14px;">Show MVP on Stream</button>
+        <button class="btn-red" onclick="clearMvp()" style="flex:1;padding:14px;">Hide MVP</button>
+    </div>
+    <div class="status-msg" id="mvp-status">Saved!</div>
+</div>
+
+<!-- ==================== TAB 4: MATCH (Previous Draft) ==================== -->
+<div class="tab-panel" id="tab-match">
+    <h1>Previous Draft</h1>
+
+    <div class="section">
+        <p style="font-size:11px;color:var(--muted);margin-bottom:14px;">Edit Game 1 draft if auto-archive was wrong. Shows on side panels during Game 2+.</p>
+        <div style="margin-bottom:12px;"><div class="team-label blue">Blue Picks</div><div id="prev-blue-picks"></div></div>
+        <div style="margin-bottom:12px;"><div class="team-label blue">Blue Bans</div><div id="prev-blue-bans"></div></div>
+        <div style="margin-bottom:12px;"><div class="team-label red">Red Picks</div><div id="prev-red-picks"></div></div>
+        <div style="margin-bottom:12px;"><div class="team-label red">Red Bans</div><div id="prev-red-bans"></div></div>
+        <button class="btn-purple" onclick="savePrevDraft()" style="width:100%;padding:12px;">Save Previous Draft</button>
+        <div class="status-msg" id="prev-status">Saved!</div>
+    </div>
+</div>
+
+<script>
+    const OVERLAY = window.location.origin;
+    const roles = ['Gold', 'Jungle', 'Mid', 'Roam', 'Exp'];
+    let heroList = [];
+    let state = null;
+    let blueHash = null, redHash = null;
+    let bgData = { casters: [], sponsors: [], groups: [], activeGroup: 0, bluePlayers: [], redPlayers: [] };
+    let prevDraftData = null;
+    let matchData = null;
+    let selectedGroupTab = 0;
+    let assignments = { blue: [], red: [] };
+    let swapSource = null;
+
+    // ===== TABS =====
+    function switchTab(name) {
+        document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById('tab-' + name).classList.add('active');
+        event.target.classList.add('active');
+    }
+
+    // ===== INIT =====
+    async function init() {
+        try { const r = await fetch('/database/herolist.json'); heroList = await r.json(); } catch(e) {}
+        try { const r = await fetch(`${OVERLAY}/api/draftbgdata`); bgData = await r.json(); if (!bgData.casters) bgData.casters = []; if (!bgData.groups) bgData.groups = []; } catch(e) {}
+        // Ensure 5 players per team
+        if (!bgData.bluePlayers || bgData.bluePlayers.length < 5) {
+            bgData.bluePlayers = bgData.bluePlayers || [];
+            while (bgData.bluePlayers.length < 5) bgData.bluePlayers.push({ name: '', hero1: '', hero2: '' });
+        }
+        if (!bgData.redPlayers || bgData.redPlayers.length < 5) {
+            bgData.redPlayers = bgData.redPlayers || [];
+            while (bgData.redPlayers.length < 5) bgData.redPlayers.push({ name: '', hero1: '', hero2: '' });
+        }
+        try { const r = await fetch(`${OVERLAY}/api/matchdata`); matchData = await r.json(); document.getElementById('game-number-select').value = parseInt(matchData.game_number) || 1; } catch(e) {}
+        try { const r = await fetch(`${OVERLAY}/api/previousdraft`); prevDraftData = await r.json(); ensurePrevDraft(); } catch(e) { prevDraftData = defaultPrevDraft(); }
+        try { const r = await fetch('/api/draft/state'); state = await r.json(); renderDraft(); } catch(e) {}
+        renderBroadcast();
+        renderPrevDraft();
+        renderSetupPlayers();
+        populateSetupFromMatchData();
+        connectWS();
+    }
+
+    function defaultPrevDraft() {
+        return { draftdata: { blueside: { pick: [{},{},{},{},{}], ban: [{},{},{},{},{}] }, redside: { pick: [{},{},{},{},{}], ban: [{},{},{},{},{}] } } };
+    }
+    function ensurePrevDraft() {
+        if (!prevDraftData || !prevDraftData.draftdata) prevDraftData = defaultPrevDraft();
+        ['blueside','redside'].forEach(s => { ['pick','ban'].forEach(t => { if (!prevDraftData.draftdata[s][t]) prevDraftData.draftdata[s][t] = []; while (prevDraftData.draftdata[s][t].length < 5) prevDraftData.draftdata[s][t].push({hero:''}); }); });
+    }
+
+    // ===== WEBSOCKET =====
+    function connectWS() {
+        const ws = new WebSocket(`${location.protocol==='https:'?'wss':'ws'}://${location.host}`);
+        ws.onmessage = e => { try { const m = JSON.parse(e.data); if (m.type === 'state') { state = m.data; renderDraft(); } } catch(e) {} };
+        ws.onclose = () => setTimeout(connectWS, 2000);
+    }
+
+    // ===== HELPERS =====
+    function getHeroName(img) { const h = heroList.find(x => x.img === img); return h ? h.name : ''; }
+    function copyText(id) { navigator.clipboard.writeText(document.getElementById(id).textContent); }
+    function showStatus(id, msg) { const el = document.getElementById(id); el.textContent = msg; el.classList.add('show'); setTimeout(() => el.classList.remove('show'), 2500); }
+
+    // Close hero dropdowns on outside click
+    document.addEventListener('click', e => { if (!e.target.classList.contains('hero-search')) document.querySelectorAll('.hero-dropdown').forEach(d => d.classList.remove('open')); });
+
+    // ===== SETUP TAB =====
+    async function generateLinks() {
+        const r = await fetch('/api/draft/generate', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ blueTeamName: document.getElementById('blue-team-input').value || 'Blue Team', redTeamName: document.getElementById('red-team-input').value || 'Red Team' }) });
+        const d = await r.json();
+        blueHash = d.blueHash; redHash = d.redHash;
+        document.getElementById('blue-link').textContent = `${location.origin}/draft/${blueHash}`;
+        document.getElementById('red-link').textContent = `${location.origin}/draft/${redHash}`;
+        document.getElementById('links-container').style.display = 'block';
+        updateNgrokLinks();
+    }
+    function updateNgrokLinks() {
+        const url = document.getElementById('ngrok-input').value.trim().replace(/\/$/,'');
+        if (url && blueHash && redHash) {
+            document.getElementById('ngrok-blue-link').textContent = `${url}/draft/${blueHash}`;
+            document.getElementById('ngrok-red-link').textContent = `${url}/draft/${redHash}`;
+            document.getElementById('ngrok-links').style.display = 'block';
+        } else { document.getElementById('ngrok-links').style.display = 'none'; }
+    }
+    // ===== SETUP: PLAYERS, LOGOS, SCORES =====
+    const lanes = ['none','gold','junggle','mid','roam','exp'];
+    let blueLogo = '';
+    let redLogo = '';
+
+    function populateSetupFromMatchData() {
+        if (!matchData || !matchData.teamdata) return;
+        const bt = matchData.teamdata.blueteam;
+        const rt = matchData.teamdata.redteam;
+        document.getElementById('blue-team-input').value = bt.teamname || 'Blue Team';
+        document.getElementById('red-team-input').value = rt.teamname || 'Red Team';
+        document.getElementById('blue-score-input').value = bt.score || '0';
+        document.getElementById('red-score-input').value = rt.score || '0';
+        blueLogo = bt.logo || '';
+        redLogo = rt.logo || '';
+    }
+
+    function renderSetupPlayers() {
+        renderSetupTeam('setup-blue-players', 'blue');
+        renderSetupTeam('setup-red-players', 'red');
+    }
+
+    function renderSetupTeam(containerId, side) {
+        const c = document.getElementById(containerId);
+        c.innerHTML = '';
+        const teamKey = side === 'blue' ? 'blueteam' : 'redteam';
+        const players = matchData?.teamdata?.[teamKey]?.playerlist || [];
+        const count = Math.max(players.length, 5);
+
+        for (let i = 0; i < count; i++) {
+            // Add divider before player 6 (subs)
+            if (i === 5) {
+                const hr = document.createElement('hr');
+                hr.className = 'player-divider';
+                c.appendChild(hr);
+            }
+
+            const p = players[i] || { name: '', hero: '' };
+            const r = document.createElement('div');
+            r.className = 'player-row';
+            r.innerHTML = `<div class="player-num" style="${i >= 5 ? 'opacity:0.4' : ''}">${i+1}</div>`;
+
+            // Move up button
+            const upBtn = document.createElement('button');
+            upBtn.className = 'reorder-btn';
+            upBtn.innerHTML = '&#9650;';
+            upBtn.title = 'Move up';
+            upBtn.disabled = (i === 0);
+            upBtn.onclick = () => { swapPlayers(side, i, i - 1); };
+            r.appendChild(upBtn);
+
+            // Move down button
+            const downBtn = document.createElement('button');
+            downBtn.className = 'reorder-btn';
+            downBtn.innerHTML = '&#9660;';
+            downBtn.title = 'Move down';
+            downBtn.disabled = (i === count - 1);
+            downBtn.onclick = () => { swapPlayers(side, i, i + 1); };
+            r.appendChild(downBtn);
+
+            const nameInp = document.createElement('input');
+            nameInp.type = 'text';
+            nameInp.className = 'nick-input';
+            nameInp.placeholder = i >= 5 ? `Sub ${i - 4}` : `Player ${i+1}`;
+            nameInp.value = p.name || '';
+            nameInp.dataset.side = side;
+            nameInp.dataset.index = i;
+            nameInp.style.opacity = i >= 5 ? '0.6' : '1';
+            nameInp.oninput = function() { updatePlayerData(side, i, 'name', this.value); };
+            r.appendChild(nameInp);
+
+            const laneSel = document.createElement('select');
+            laneSel.className = 'lane-select';
+            lanes.forEach(l => {
+                const o = document.createElement('option');
+                o.value = l;
+                o.textContent = l === 'none' ? 'Lane' : l.charAt(0).toUpperCase() + l.slice(1);
+                laneSel.appendChild(o);
+            });
+            laneSel.dataset.side = side;
+            laneSel.dataset.index = i;
+            laneSel.oninput = function() { /* lanes are saved on Save button */ };
+            r.appendChild(laneSel);
+
+            // Remove button for subs (player 6+)
+            if (i >= 5) {
+                const rmBtn = document.createElement('button');
+                rmBtn.className = 'btn-remove';
+                rmBtn.textContent = 'X';
+                rmBtn.style.cssText = 'padding:4px 8px;font-size:10px;flex-shrink:0;';
+                rmBtn.onclick = () => { removePlayer(side, i); };
+                r.appendChild(rmBtn);
+            }
+
+            c.appendChild(r);
+        }
+
+        // Add player button
+        const addBtn = document.createElement('button');
+        addBtn.className = 'add-player-btn';
+        addBtn.textContent = '+ Add Sub';
+        addBtn.onclick = () => { addPlayer(side); };
+        c.appendChild(addBtn);
+    }
+
+    function swapPlayers(side, fromIdx, toIdx) {
+        const teamKey = side === 'blue' ? 'blueteam' : 'redteam';
+        if (!matchData?.teamdata?.[teamKey]?.playerlist) return;
+        const list = matchData.teamdata[teamKey].playerlist;
+        if (toIdx < 0 || toIdx >= list.length) return;
+        const temp = list[fromIdx];
+        list[fromIdx] = list[toIdx];
+        list[toIdx] = temp;
+        renderSetupPlayers();
+    }
+
+    function addPlayer(side) {
+        const teamKey = side === 'blue' ? 'blueteam' : 'redteam';
+        if (!matchData) matchData = {};
+        if (!matchData.teamdata) matchData.teamdata = { blueteam: { teamname: '', score: '0', logo: '', playerlist: [] }, redteam: { teamname: '', score: '0', logo: '', playerlist: [] } };
+        if (!matchData.teamdata[teamKey].playerlist) matchData.teamdata[teamKey].playerlist = [];
+        matchData.teamdata[teamKey].playerlist.push({ name: '', hero: '', level: 0, KDA: '0/0/0', gold: 0, spell: 'idle', banhero: '', itemlist: ['idle','idle','idle','idle','idle','idle'] });
+        renderSetupPlayers();
+    }
+
+    function removePlayer(side, index) {
+        const teamKey = side === 'blue' ? 'blueteam' : 'redteam';
+        if (!matchData?.teamdata?.[teamKey]?.playerlist) return;
+        matchData.teamdata[teamKey].playerlist.splice(index, 1);
+        renderSetupPlayers();
+    }
+
+    function updatePlayerData(side, index, field, value) {
+        if (!matchData) matchData = {};
+        if (!matchData.teamdata) matchData.teamdata = { blueteam: { teamname: '', score: '0', logo: '', playerlist: [] }, redteam: { teamname: '', score: '0', logo: '', playerlist: [] } };
+        const teamKey = side === 'blue' ? 'blueteam' : 'redteam';
+        if (!matchData.teamdata[teamKey].playerlist) matchData.teamdata[teamKey].playerlist = [];
+        while (matchData.teamdata[teamKey].playerlist.length < 5) {
+            matchData.teamdata[teamKey].playerlist.push({ name: '', hero: '', level: 0, KDA: '0/0/0', gold: 0, spell: 'idle', banhero: '', itemlist: ['idle','idle','idle','idle','idle','idle'] });
+        }
+        matchData.teamdata[teamKey].playerlist[index][field] = value;
+    }
+
+    function handleLogoUpload(side, input) {
+        const file = input.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            if (side === 'blue') blueLogo = e.target.result;
+            else redLogo = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    }
+
+    async function saveMatchSetup() {
+        if (!matchData) matchData = {};
+        if (!matchData.teamdata) matchData.teamdata = { blueteam: { teamname: '', score: '0', logo: '', playerlist: [] }, redteam: { teamname: '', score: '0', logo: '', playerlist: [] } };
+
+        matchData.teamdata.blueteam.teamname = document.getElementById('blue-team-input').value;
+        matchData.teamdata.blueteam.score = document.getElementById('blue-score-input').value;
+        if (blueLogo) matchData.teamdata.blueteam.logo = blueLogo;
+
+        matchData.teamdata.redteam.teamname = document.getElementById('red-team-input').value;
+        matchData.teamdata.redteam.score = document.getElementById('red-score-input').value;
+        if (redLogo) matchData.teamdata.redteam.logo = redLogo;
+
+        // Collect all player names from inputs (including subs)
+        document.querySelectorAll('#setup-blue-players .nick-input').forEach((inp, i) => {
+            updatePlayerData('blue', i, 'name', inp.value);
+        });
+        document.querySelectorAll('#setup-red-players .nick-input').forEach((inp, i) => {
+            updatePlayerData('red', i, 'name', inp.value);
+        });
+
+        // Send to overlay with only top 5 players for stream display
+        const overlayData = JSON.parse(JSON.stringify(matchData));
+        if (overlayData.teamdata.blueteam.playerlist?.length > 5) {
+            overlayData.teamdata.blueteam.playerlist = overlayData.teamdata.blueteam.playerlist.slice(0, 5);
+        }
+        if (overlayData.teamdata.redteam.playerlist?.length > 5) {
+            overlayData.teamdata.redteam.playerlist = overlayData.teamdata.redteam.playerlist.slice(0, 5);
+        }
+
+        await fetch(`${OVERLAY}/api/matchdata`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(overlayData) });
+        showStatus('setup-status', 'Saved! Top 5 players sent to stream.');
+    }
+
+    function switchTeams() {
+        // Swap team names
+        const blueInput = document.getElementById('blue-team-input');
+        const redInput = document.getElementById('red-team-input');
+        const tempName = blueInput.value;
+        blueInput.value = redInput.value;
+        redInput.value = tempName;
+
+        // Swap scores
+        const blueScore = document.getElementById('blue-score-input');
+        const redScore = document.getElementById('red-score-input');
+        const tempScore = blueScore.value;
+        blueScore.value = redScore.value;
+        redScore.value = tempScore;
+
+        // Swap logos
+        const tempLogo = blueLogo;
+        blueLogo = redLogo;
+        redLogo = tempLogo;
+
+        // Swap players in matchdata
+        if (matchData?.teamdata) {
+            const tempPlayerlist = matchData.teamdata.blueteam.playerlist;
+            matchData.teamdata.blueteam.playerlist = matchData.teamdata.redteam.playerlist;
+            matchData.teamdata.redteam.playerlist = tempPlayerlist;
+        }
+        renderSetupPlayers();
+
+        // Swap players in broadcast
+        const tempBgPlayers = bgData.bluePlayers;
+        bgData.bluePlayers = bgData.redPlayers;
+        bgData.redPlayers = tempBgPlayers;
+        renderPlayers();
+
+        // Swap previous draft sides
+        if (prevDraftData?.draftdata) {
+            const tempPrevBlue = prevDraftData.draftdata.blueside;
+            prevDraftData.draftdata.blueside = prevDraftData.draftdata.redside;
+            prevDraftData.draftdata.redside = tempPrevBlue;
+            renderPrevDraft();
+        }
+    }
+
+    async function updateGameNumber(v) {
+        if (!matchData) try { const r = await fetch(`${OVERLAY}/api/matchdata`); matchData = await r.json(); } catch(e) { matchData = {}; }
+        matchData.game_number = v;
+        await fetch(`${OVERLAY}/api/matchdata`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(matchData) });
+    }
+
+    // ===== DRAFT TAB =====
+    function renderDraft() {
+        if (!state) return;
+        document.getElementById('status-val').textContent = state.status.toUpperCase();
+        document.getElementById('status-val').className = 'status-value ' + state.status;
+        document.getElementById('admin-blue-dot').className = 'rdot' + (state.blueReady ? ' ready' : '');
+        document.getElementById('admin-red-dot').className = 'rdot' + (state.redReady ? ' ready' : '');
+        document.getElementById('admin-blue-name').textContent = state.blueTeamName;
+        document.getElementById('admin-red-name').textContent = state.redTeamName;
+        const t = document.getElementById('admin-timer');
+        t.textContent = state.status === 'done' ? 'VS' : String(state.timer).padStart(2,'0');
+        t.className = 'phase-timer' + (state.timer <= 10 && state.timerRunning ? ' urgent' : '') + (state.status === 'done' ? '' : '');
+        if (state.status === 'done') t.style.color = 'var(--red)'; else t.style.color = '';
+        const p = document.getElementById('admin-phase');
+        if (state.status === 'done') p.textContent = 'DRAFT COMPLETE';
+        else if (state.phaseInfo) p.textContent = `Phase ${state.currentPhase+1}/18 — ${state.phaseInfo.type.toUpperCase()} — ${state.activeSide === 'blue' ? state.blueTeamName : state.redTeamName}`;
+        else p.textContent = 'WAITING';
+        document.getElementById('live-blue-name').textContent = state.blueTeamName;
+        document.getElementById('live-red-name').textContent = state.redTeamName;
+        renderSlots('live-blue-bans', state.blueside.ban, 'BAN');
+        renderSlots('live-blue-picks', state.blueside.pick, 'PICK');
+        renderSlots('live-red-bans', state.redside.ban, 'BAN');
+        renderSlots('live-red-picks', state.redside.pick, 'PICK');
+        document.getElementById('review-draft-btn').classList.toggle('visible', state.status === 'done');
+    }
+    function renderSlots(id, heroes, type) {
+        const c = document.getElementById(id); c.innerHTML = '';
+        heroes.forEach((h, i) => { const s = document.createElement('div'); s.className = 'draft-hero-slot'; s.innerHTML = `<span class="slot-type">${type}${i+1}</span>`; if (h) { s.innerHTML += `<img src="${h}"><span>${getHeroName(h)}</span>`; } else { s.innerHTML += `<span style="color:var(--muted)">—</span>`; } c.appendChild(s); });
+    }
+    async function pauseResume() { await fetch('/api/draft/pause', {method:'POST'}); }
+    async function advancePhase() { await fetch('/api/draft/advance', {method:'POST'}); }
+    async function resetDraft() { if (confirm('Reset draft?')) { await fetch('/api/draft/reset', {method:'POST'}); document.getElementById('assign-section').classList.remove('visible'); } }
+
+    // ===== POST-DRAFT ASSIGNMENT =====
+    async function openAssignment() {
+        if (!matchData) try { const r = await fetch(`${OVERLAY}/api/matchdata`); matchData = await r.json(); } catch(e) {}
+        const bp = matchData?.teamdata?.blueteam?.playerlist || [];
+        const rp = matchData?.teamdata?.redteam?.playerlist || [];
+        assignments.blue = []; assignments.red = [];
+        if (state) {
+            state.blueside.pick.forEach((h,i) => assignments.blue.push({ hero: h||'', playerName: bp[i]?.name||`Player ${i+1}`, role: roles[i]||'Gold' }));
+            state.redside.pick.forEach((h,i) => assignments.red.push({ hero: h||'', playerName: rp[i]?.name||`Player ${i+1}`, role: roles[i]||'Gold' }));
+        }
+        document.getElementById('assign-blue-title').textContent = state?.blueTeamName || 'Blue';
+        document.getElementById('assign-red-title').textContent = state?.redTeamName || 'Red';
+        renderAssignments();
+        document.getElementById('assign-section').classList.add('visible');
+        document.getElementById('assign-section').scrollIntoView({behavior:'smooth'});
+    }
+    function renderAssignments() { renderTeamAssign('assign-blue-rows','blue'); renderTeamAssign('assign-red-rows','red'); }
+    function renderTeamAssign(id, side) {
+        const c = document.getElementById(id); c.innerHTML = '';
+        assignments[side].forEach((a,i) => {
+            const r = document.createElement('div'); r.className = 'assign-row';
+            r.innerHTML = `${a.hero?`<img class="assign-hero-img" src="${a.hero}">`:''}
+                <div class="assign-hero-name">${getHeroName(a.hero)||'—'}</div><span class="assign-arrow">→</span>`;
+            const inp = document.createElement('input'); inp.type = 'text'; inp.className = 'assign-select'; inp.value = a.playerName; inp.oninput = () => { assignments[side][i].playerName = inp.value; }; r.appendChild(inp);
+            const sel = document.createElement('select'); sel.className = 'assign-role'; roles.forEach(rl => { const o = document.createElement('option'); o.value = rl; o.textContent = rl; if (rl===a.role) o.selected=true; sel.appendChild(o); }); sel.onchange = () => { assignments[side][i].role = sel.value; }; r.appendChild(sel);
+            const sw = document.createElement('button'); sw.className = 'swap-btn'; sw.textContent = 'Swap'; sw.onclick = () => handleSwap(side,i,sw); r.appendChild(sw);
+            c.appendChild(r);
+        });
+    }
+    function handleSwap(side, idx, btn) {
+        if (!swapSource || swapSource.side !== side) { document.querySelectorAll('.swap-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); swapSource = {side,index:idx}; }
+        else if (swapSource.index === idx) { btn.classList.remove('active'); swapSource = null; }
+        else { const a = assignments[side]; const tn = a[swapSource.index].playerName; const tr = a[swapSource.index].role; a[swapSource.index].playerName = a[idx].playerName; a[swapSource.index].role = a[idx].role; a[idx].playerName = tn; a[idx].role = tr; swapSource = null; renderAssignments(); }
+    }
+    async function finalizeDraft() { await saveAssignments(); showStatus('finalize-status','Draft finalized & saved!'); }
+    async function archiveDraft() { await saveAssignments(); try { await fetch(`${OVERLAY}/api/archive-draft`,{method:'POST'}); } catch(e) {} showStatus('finalize-status','Finalized, saved & archived!'); }
+    async function saveAssignments() {
+        if (!matchData) try { const r = await fetch(`${OVERLAY}/api/matchdata`); matchData = await r.json(); } catch(e) { matchData = {}; }
+        assignments.blue.forEach((a,i) => { if (matchData?.teamdata?.blueteam?.playerlist?.[i]) { matchData.teamdata.blueteam.playerlist[i].name = a.playerName; matchData.teamdata.blueteam.playerlist[i].hero = a.hero; } });
+        assignments.red.forEach((a,i) => { if (matchData?.teamdata?.redteam?.playerlist?.[i]) { matchData.teamdata.redteam.playerlist[i].name = a.playerName; matchData.teamdata.redteam.playerlist[i].hero = a.hero; } });
+        await fetch(`${OVERLAY}/api/matchdata`, {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(matchData)});
+        if (state) {
+            await fetch(`${OVERLAY}/api/matchdraft`, {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({draftdata:{timer:'0',timer_running:false,current_phase:17,blueside:{ban:state.blueside.ban.map(h=>({hero:h||''})),pick:assignments.blue.map(a=>({hero:a.hero||''}))},redside:{ban:state.redside.ban.map(h=>({hero:h||''})),pick:assignments.red.map(a=>({hero:a.hero||''}))}}})});
+        }
+    }
+
+    // ===== BROADCAST TAB =====
+    function renderBroadcast() { renderCasters(); renderSponsors(); renderGroups(); renderPlayers(); }
+    function renderCasters() {
+        const c = document.getElementById('caster-list'); c.innerHTML = '';
+        bgData.casters.forEach((n,i) => { const r = document.createElement('div'); r.className = 'row'; r.innerHTML = `<input type="text" placeholder="Caster Name" value="${n||''}" oninput="bgData.casters[${i}]=this.value"><button class="btn-remove" onclick="bgData.casters.splice(${i},1);renderCasters()">X</button>`; c.appendChild(r); });
+    }
+    function addCaster() { bgData.casters.push(''); renderCasters(); }
+    function renderSponsors() {
+        const c = document.getElementById('sponsor-list'); c.innerHTML = '';
+        bgData.sponsors.forEach((s,i) => { const r = document.createElement('div'); r.className = 'row'; r.innerHTML = `<input type="text" placeholder="Name" value="${s.name||''}" oninput="bgData.sponsors[${i}].name=this.value" style="flex:2"><input type="text" placeholder="Amount" value="${s.amount||''}" oninput="bgData.sponsors[${i}].amount=this.value"><button class="btn-remove" onclick="bgData.sponsors.splice(${i},1);renderSponsors()">X</button>`; c.appendChild(r); });
+    }
+    function addSponsor() { bgData.sponsors.push({name:'',amount:''}); renderSponsors(); }
+    function renderGroups() { renderGroupTabs(); renderGroupContent(); renderActiveGroupSelect(); }
+    function renderGroupTabs() {
+        const c = document.getElementById('group-tabs'); c.innerHTML = '';
+        bgData.groups.forEach((g,i) => { const b = document.createElement('button'); b.className = 'group-tab'+(i===selectedGroupTab?' active':''); b.textContent = g.name||'Group '+(i+1); b.onclick = () => { selectedGroupTab=i; renderGroups(); }; c.appendChild(b); });
+    }
+    function renderGroupContent() {
+        const c = document.getElementById('group-content'); c.innerHTML = '';
+        if (!bgData.groups.length) { c.innerHTML = '<p style="color:var(--muted);font-size:12px;">No groups yet.</p>'; return; }
+        const g = bgData.groups[selectedGroupTab]; if (!g) return;
+        c.innerHTML = `<div class="row"><input type="text" style="flex:1" placeholder="Group Name" value="${g.name||''}" oninput="bgData.groups[${selectedGroupTab}].name=this.value;renderGroupTabs()"><button class="btn-remove" onclick="bgData.groups.splice(${selectedGroupTab},1);selectedGroupTab=Math.max(0,selectedGroupTab-1);renderGroups()">Delete</button></div>`;
+        const td = document.createElement('div');
+        (g.teams||[]).forEach((t,ti) => { const r = document.createElement('div'); r.className = 'group-team-row'; r.innerHTML = `<div class="player-num">${ti+1}</div><input type="text" class="tname" placeholder="Team" value="${t.name||''}" oninput="bgData.groups[${selectedGroupTab}].teams[${ti}].name=this.value"><div class="group-field"><label>W</label><input type="number" min="0" value="${t.wins||0}" oninput="bgData.groups[${selectedGroupTab}].teams[${ti}].wins=parseInt(this.value)||0"></div><div class="group-field"><label>L</label><input type="number" min="0" value="${t.losses||0}" oninput="bgData.groups[${selectedGroupTab}].teams[${ti}].losses=parseInt(this.value)||0"></div><div class="group-field"><label>Pts</label><input type="number" min="0" value="${t.points||0}" oninput="bgData.groups[${selectedGroupTab}].teams[${ti}].points=parseInt(this.value)||0"></div><button class="btn-remove" onclick="bgData.groups[${selectedGroupTab}].teams.splice(${ti},1);renderGroupContent()">X</button>`; td.appendChild(r); });
+        c.appendChild(td);
+        const ab = document.createElement('button'); ab.className = 'btn-add'; ab.textContent = '+ Team'; ab.style.marginTop = '6px'; ab.onclick = () => { bgData.groups[selectedGroupTab].teams.push({name:'',wins:0,losses:0,points:0}); renderGroupContent(); }; c.appendChild(ab);
+    }
+    function renderActiveGroupSelect() {
+        const s = document.getElementById('active-group-select'); s.innerHTML = '';
+        bgData.groups.forEach((g,i) => { const o = document.createElement('option'); o.value = i; o.textContent = g.name||'Group '+(i+1); if (i===bgData.activeGroup) o.selected=true; s.appendChild(o); });
+    }
+    function addGroup() { bgData.groups.push({name:'Group '+String.fromCharCode(65+bgData.groups.length),teams:[{name:'',wins:0,losses:0,points:0},{name:'',wins:0,losses:0,points:0},{name:'',wins:0,losses:0,points:0},{name:'',wins:0,losses:0,points:0}]}); selectedGroupTab=bgData.groups.length-1; renderGroups(); }
+    function renderPlayers() { renderTeamPlayers('blue-players',bgData.bluePlayers||[],'bluePlayers'); renderTeamPlayers('red-players',bgData.redPlayers||[],'redPlayers'); }
+    function renderTeamPlayers(id, players, key) {
+        const c = document.getElementById(id); c.innerHTML = '';
+        players.forEach((p,i) => {
+            const r = document.createElement('div'); r.className = 'player-row';
+            r.innerHTML = `<div class="player-num">${i+1}</div><input type="text" placeholder="Player" value="${p.name||''}" oninput="bgData.${key}[${i}].name=this.value">
+                <div class="hero-select-wrap"><input type="text" class="hero-search" placeholder="Hero 1" value="${getHeroName(p.hero1)}" onfocus="openHeroDrop(this,'${key}',${i},'hero1')" oninput="filterHeroDrop(this,'${key}',${i},'hero1')"><div class="hero-dropdown"></div></div>
+                <div class="hero-select-wrap"><input type="text" class="hero-search" placeholder="Hero 2" value="${getHeroName(p.hero2)}" onfocus="openHeroDrop(this,'${key}',${i},'hero2')" oninput="filterHeroDrop(this,'${key}',${i},'hero2')"><div class="hero-dropdown"></div></div>`;
+            c.appendChild(r);
+        });
+    }
+    function openHeroDrop(inp,key,pi,field) { document.querySelectorAll('.hero-dropdown').forEach(d=>d.classList.remove('open')); const dd = inp.nextElementSibling; populateHeroDrop(dd,'',key,pi,field); dd.classList.add('open'); }
+    function filterHeroDrop(inp,key,pi,field) { const dd = inp.nextElementSibling; populateHeroDrop(dd,inp.value,key,pi,field); dd.classList.add('open'); }
+    function populateHeroDrop(dd,filter,key,pi,field) {
+        dd.innerHTML = '';
+        heroList.filter(h=>h.name.toLowerCase().includes(filter.toLowerCase())).slice(0,15).forEach(hero => {
+            const o = document.createElement('div'); o.className = 'hero-option'; o.innerHTML = `<img src="${hero.img}"><span>${hero.name}</span>`;
+            o.onclick = () => { bgData[key][pi][field] = hero.img; dd.previousElementSibling.value = hero.name; dd.classList.remove('open'); };
+            dd.appendChild(o);
+        });
+    }
+    async function saveBgData() {
+        await fetch(`${OVERLAY}/api/draftbgdata`, {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(bgData)});
+        showStatus('bg-status','Broadcast settings saved!');
+    }
+
+    // ===== MATCH TAB (Previous Draft) =====
+    function renderPrevDraft() {
+        if (!prevDraftData?.draftdata) return;
+        renderPrevRow('prev-blue-picks', prevDraftData.draftdata.blueside.pick, 'blueside','pick');
+        renderPrevRow('prev-blue-bans', prevDraftData.draftdata.blueside.ban, 'blueside','ban');
+        renderPrevRow('prev-red-picks', prevDraftData.draftdata.redside.pick, 'redside','pick');
+        renderPrevRow('prev-red-bans', prevDraftData.draftdata.redside.ban, 'redside','ban');
+    }
+    function renderPrevRow(id, heroes, side, type) {
+        const c = document.getElementById(id); c.innerHTML = '';
+        heroes.forEach((h,i) => {
+            const r = document.createElement('div'); r.className = 'player-row';
+            r.innerHTML = `<div class="player-num" style="width:20px;height:20px;font-size:10px;">${i+1}</div>
+                <div class="hero-select-wrap"><input type="text" class="hero-search" placeholder="${type==='pick'?'Pick':'Ban'} ${i+1}" value="${getHeroName(h.hero)}" onfocus="openPrevDrop(this,'${side}','${type}',${i})" oninput="filterPrevDrop(this,'${side}','${type}',${i})"><div class="hero-dropdown"></div></div>
+                <button class="btn-remove" style="padding:5px 8px;font-size:10px;" onclick="prevDraftData.draftdata.${side}.${type}[${i}].hero='';renderPrevDraft()">X</button>`;
+            c.appendChild(r);
+        });
+    }
+    function openPrevDrop(inp,side,type,idx) { document.querySelectorAll('.hero-dropdown').forEach(d=>d.classList.remove('open')); const dd=inp.nextElementSibling; populatePrevDrop(dd,'',side,type,idx); dd.classList.add('open'); }
+    function filterPrevDrop(inp,side,type,idx) { const dd=inp.nextElementSibling; populatePrevDrop(dd,inp.value,side,type,idx); dd.classList.add('open'); }
+    function populatePrevDrop(dd,filter,side,type,idx) {
+        dd.innerHTML = '';
+        heroList.filter(h=>h.name.toLowerCase().includes(filter.toLowerCase())).slice(0,15).forEach(hero => {
+            const o = document.createElement('div'); o.className = 'hero-option'; o.innerHTML = `<img src="${hero.img}"><span>${hero.name}</span>`;
+            o.onclick = () => { prevDraftData.draftdata[side][type][idx].hero = hero.img; dd.previousElementSibling.value = hero.name; dd.classList.remove('open'); };
+            dd.appendChild(o);
+        });
+    }
+    async function savePrevDraft() {
+        await fetch(`${OVERLAY}/api/previousdraft`, {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(prevDraftData)});
+        showStatus('prev-status','Previous draft saved!');
+    }
+
+    // ===== AUTOCOMPLETE SYSTEM =====
+    let acTimeout = null;
+
+    function attachAutocomplete(input, type, onSelect) {
+        const wrap = document.createElement('div');
+        wrap.className = 'ac-wrap';
+        input.parentNode.insertBefore(wrap, input);
+        wrap.appendChild(input);
+
+        const dd = document.createElement('div');
+        dd.className = 'ac-dropdown';
+        wrap.appendChild(dd);
+
+        input.addEventListener('input', () => {
+            clearTimeout(acTimeout);
+            acTimeout = setTimeout(() => acSearch(input, dd, type, onSelect), 150);
+        });
+        input.addEventListener('focus', () => {
+            acSearch(input, dd, type, onSelect);
+        });
+    }
+
+    async function acSearch(input, dd, type, onSelect) {
+        const q = input.value.trim();
+        try {
+            const r = await fetch(`/api/db/search?type=${type}&q=${encodeURIComponent(q)}`);
+            const results = await r.json();
+            dd.innerHTML = '';
+            if (!results.length) { dd.classList.remove('open'); return; }
+            results.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'ac-item';
+                let html = '';
+                if (type === 'teams' && item.logo) {
+                    html += `<img class="ac-logo" src="${item.logo}">`;
+                }
+                html += `<span>${item.name}</span>`;
+                if (type === 'players' && item.team) {
+                    html += `<span class="ac-meta">${item.team}${item.role ? ' / ' + item.role : ''}</span>`;
+                }
+                if (type === 'sponsors' && item.amount) {
+                    html += `<span class="ac-meta">${item.amount}</span>`;
+                }
+                div.innerHTML = html;
+                div.addEventListener('mousedown', (e) => {
+                    e.preventDefault();
+                    input.value = item.name;
+                    input.dispatchEvent(new Event('input', { bubbles: true }));
+                    dd.classList.remove('open');
+                    if (onSelect) onSelect(item);
+                });
+                dd.appendChild(div);
+            });
+            dd.classList.add('open');
+        } catch (e) {}
+    }
+
+    // Close all autocomplete dropdowns on outside click
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('.ac-wrap')) {
+            document.querySelectorAll('.ac-dropdown').forEach(d => d.classList.remove('open'));
+        }
+    });
+
+    // Attach autocomplete to team name inputs
+    function initTeamAutocomplete() {
+        const blueTeamInput = document.getElementById('blue-team-input');
+        const redTeamInput = document.getElementById('red-team-input');
+
+        attachAutocomplete(blueTeamInput, 'teams', (item) => {
+            if (item.logo) { blueLogo = item.logo; }
+            // Auto-fill players for this team
+            autoFillPlayers('blue', item.name);
+        });
+        attachAutocomplete(redTeamInput, 'teams', (item) => {
+            if (item.logo) { redLogo = item.logo; }
+            autoFillPlayers('red', item.name);
+        });
+    }
+
+    async function autoFillPlayers(side, teamName) {
+        try {
+            const r = await fetch(`/api/db/team-players/${encodeURIComponent(teamName)}`);
+            const players = await r.json();
+            if (players.length > 0) {
+                const teamKey = side === 'blue' ? 'blueteam' : 'redteam';
+                if (!matchData) matchData = {};
+                if (!matchData.teamdata) matchData.teamdata = { blueteam: { teamname: '', score: '0', logo: '', playerlist: [] }, redteam: { teamname: '', score: '0', logo: '', playerlist: [] } };
+                // Reset playerlist to match roster size
+                matchData.teamdata[teamKey].playerlist = [];
+                players.forEach(p => {
+                    matchData.teamdata[teamKey].playerlist.push({ name: p.name, hero: '', level: 0, KDA: '0/0/0', gold: 0, spell: 'idle', banhero: '', itemlist: ['idle','idle','idle','idle','idle','idle'] });
+                });
+                // Ensure at least 5 slots
+                while (matchData.teamdata[teamKey].playerlist.length < 5) {
+                    matchData.teamdata[teamKey].playerlist.push({ name: '', hero: '', level: 0, KDA: '0/0/0', gold: 0, spell: 'idle', banhero: '', itemlist: ['idle','idle','idle','idle','idle','idle'] });
+                }
+                renderSetupPlayers();
+            }
+        } catch (e) {}
+    }
+
+    // Patch renderSetupTeam to add autocomplete on player name inputs
+    const _origRenderSetupTeam = renderSetupTeam;
+    renderSetupTeam = function(containerId, side) {
+        _origRenderSetupTeam(containerId, side);
+        const container = document.getElementById(containerId);
+        container.querySelectorAll('.nick-input').forEach(inp => {
+            attachAutocomplete(inp, 'players', (item) => {
+                // Player selected, update lane if known
+                if (item.role) {
+                    const laneSelect = inp.closest('.player-row')?.querySelector('.lane-select');
+                    if (laneSelect) {
+                        const laneVal = item.role.toLowerCase();
+                        if ([...laneSelect.options].find(o => o.value === laneVal)) {
+                            laneSelect.value = laneVal;
+                        }
+                    }
+                }
+            });
+        });
+    };
+
+    // Patch renderCasters to add autocomplete
+    const _origRenderCasters = renderCasters;
+    renderCasters = function() {
+        _origRenderCasters();
+        document.querySelectorAll('#caster-list .row input[type="text"]').forEach(inp => {
+            attachAutocomplete(inp, 'casters');
+        });
+    };
+
+    // Patch renderSponsors to add autocomplete
+    const _origRenderSponsors = renderSponsors;
+    renderSponsors = function() {
+        _origRenderSponsors();
+        document.querySelectorAll('#sponsor-list .row input[placeholder="Name"]').forEach(inp => {
+            attachAutocomplete(inp, 'sponsors', (item) => {
+                if (item.amount) {
+                    const amountInput = inp.closest('.row')?.querySelector('input[placeholder="Amount"]');
+                    if (amountInput) { amountInput.value = item.amount; amountInput.dispatchEvent(new Event('input', { bubbles: true })); }
+                }
+            });
+        });
+    };
+
+    // Patch renderGroupContent to add autocomplete on group team names
+    const _origRenderGroupContent = renderGroupContent;
+    renderGroupContent = function() {
+        _origRenderGroupContent();
+        document.querySelectorAll('#group-content .tname').forEach(inp => {
+            attachAutocomplete(inp, 'teams');
+        });
+    };
+
+    // Patch renderTeamPlayers (broadcast player spotlight) to add autocomplete
+    const _origRenderTeamPlayers = renderTeamPlayers;
+    renderTeamPlayers = function(id, players, key) {
+        _origRenderTeamPlayers(id, players, key);
+        document.querySelectorAll(`#${id} input[placeholder="Player"]`).forEach(inp => {
+            attachAutocomplete(inp, 'players');
+        });
+    };
+
+    // ===== ITEM/SPELL DATABASE =====
+    let itemSpellList = [];
+
+    async function loadItemSpellList() {
+        try {
+            const r = await fetch('/database/itemspelllist.json');
+            itemSpellList = await r.json();
+        } catch (e) { itemSpellList = []; }
+    }
+
+    function attachItemSpellAutocomplete(input, filterType) {
+        const wrap = document.createElement('div');
+        wrap.className = 'ac-wrap';
+        input.parentNode.insertBefore(wrap, input);
+        wrap.appendChild(input);
+
+        const dd = document.createElement('div');
+        dd.className = 'ac-dropdown';
+        wrap.appendChild(dd);
+
+        input.addEventListener('input', () => showItemSpellDrop(input, dd, filterType));
+        input.addEventListener('focus', () => showItemSpellDrop(input, dd, filterType));
+    }
+
+    function showItemSpellDrop(input, dd, filterType) {
+        const q = input.value.trim().toLowerCase();
+        let results = itemSpellList;
+        if (filterType) results = results.filter(i => i.type === filterType);
+        if (q) results = results.filter(i => i.name.toLowerCase().includes(q));
+        results = results.slice(0, 20);
+
+        dd.innerHTML = '';
+        if (!results.length) { dd.classList.remove('open'); return; }
+        results.forEach(item => {
+            const div = document.createElement('div');
+            div.className = 'ac-item';
+            div.innerHTML = `<img class="ac-logo" src="/Assets/Itemandspell/${item.file}" style="border-radius:4px;"><span>${item.name}</span><span class="ac-meta">${item.type}</span>`;
+            div.addEventListener('mousedown', (e) => {
+                e.preventDefault();
+                input.value = item.name;
+                input.dispatchEvent(new Event('input', { bubbles: true }));
+                dd.classList.remove('open');
+            });
+            dd.appendChild(div);
+        });
+        dd.classList.add('open');
+    }
+
+    function initMvpItemAutocomplete() {
+        const spellInput = document.getElementById('mvp-spell');
+        if (spellInput) attachItemSpellAutocomplete(spellInput, 'spell');
+        for (let i = 1; i <= 6; i++) {
+            const itemInput = document.getElementById('mvp-item' + i);
+            if (itemInput) attachItemSpellAutocomplete(itemInput, 'item');
+        }
+    }
+
+    // ===== MVP TAB =====
+    let mvpHeroImg = '';
+
+    function openMvpHeroDrop() {
+        document.querySelectorAll('.hero-dropdown').forEach(d => d.classList.remove('open'));
+        const dd = document.getElementById('mvp-hero-dropdown');
+        populateMvpHeroDrop('');
+        dd.classList.add('open');
+    }
+    function filterMvpHeroDrop() {
+        const dd = document.getElementById('mvp-hero-dropdown');
+        populateMvpHeroDrop(document.getElementById('mvp-hero-search').value);
+        dd.classList.add('open');
+    }
+    function populateMvpHeroDrop(filter) {
+        const dd = document.getElementById('mvp-hero-dropdown');
+        dd.innerHTML = '';
+        heroList.filter(h => h.name.toLowerCase().includes(filter.toLowerCase())).slice(0, 15).forEach(hero => {
+            const o = document.createElement('div');
+            o.className = 'hero-option';
+            o.innerHTML = `<img src="${hero.img}"><span>${hero.name}</span>`;
+            o.onclick = () => {
+                mvpHeroImg = hero.img;
+                document.getElementById('mvp-hero-search').value = hero.name;
+                dd.classList.remove('open');
+                const preview = document.getElementById('mvp-hero-preview');
+                preview.style.display = 'block';
+                document.getElementById('mvp-hero-preview-img').src = hero.img;
+                document.getElementById('mvp-hero-preview-name').textContent = hero.name;
+            };
+            dd.appendChild(o);
+        });
+    }
+
+    async function saveMvp() {
+        const k = document.getElementById('mvp-kills').value || '0';
+        const d = document.getElementById('mvp-deaths').value || '0';
+        const a = document.getElementById('mvp-assists').value || '0';
+
+        const mvpData = {
+            mvp: {
+                side: document.getElementById('mvp-side').value,
+                nickname: document.getElementById('mvp-nickname').value || 'PLAYER',
+                role: document.getElementById('mvp-role').value || 'gold',
+                heroImg: mvpHeroImg,
+                playerPhoto: 'Assets/player/noplayer.png',
+                stats: {
+                    LVL: parseInt(document.getElementById('mvp-lvl').value) || 15,
+                    KDA: `${k}/${d}/${a}`,
+                    GOLD: parseInt(document.getElementById('mvp-gold').value) || 0,
+                    SPELL: document.getElementById('mvp-spell').value || 'idle',
+                    'ITEM 1': document.getElementById('mvp-item1').value || 'idle',
+                    'ITEM 2': document.getElementById('mvp-item2').value || 'idle',
+                    'ITEM 3': document.getElementById('mvp-item3').value || 'idle',
+                    'ITEM 4': document.getElementById('mvp-item4').value || 'idle',
+                    'ITEM 5': document.getElementById('mvp-item5').value || 'idle',
+                    'ITEM 6': document.getElementById('mvp-item6').value || 'idle'
+                }
+            }
+        };
+
+        await fetch(`${OVERLAY}/api/mvp`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(mvpData) });
+        showStatus('mvp-status', 'MVP displayed on stream!');
+    }
+
+    async function clearMvp() {
+        await fetch(`${OVERLAY}/api/mvp`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ mvp: null }) });
+        showStatus('mvp-status', 'MVP hidden from stream.');
+    }
+
+    async function quickFillMvp(key) {
+        if (!key) return;
+        const [side, idx] = key.split('-');
+        const teamKey = side === 'blue' ? 'blueteam' : 'redteam';
+        if (!matchData?.teamdata?.[teamKey]?.playerlist) return;
+        const p = matchData.teamdata[teamKey].playerlist[parseInt(idx)];
+        if (!p) return;
+
+        const defaultRoles = ['gold', 'junggle', 'mid', 'roam', 'exp'];
+        document.getElementById('mvp-side').value = side;
+        document.getElementById('mvp-nickname').value = p.name || '';
+        document.getElementById('mvp-role').value = defaultRoles[parseInt(idx)] || 'gold';
+        if (p.hero) {
+            mvpHeroImg = p.hero;
+            const hero = heroList.find(h => h.img === p.hero);
+            document.getElementById('mvp-hero-search').value = hero ? hero.name : '';
+            const preview = document.getElementById('mvp-hero-preview');
+            preview.style.display = 'block';
+            document.getElementById('mvp-hero-preview-img').src = p.hero;
+            document.getElementById('mvp-hero-preview-name').textContent = hero ? hero.name : '';
+        }
+        document.getElementById('mvp-lvl').value = p.level || 15;
+
+        const kda = (p.KDA || '0/0/0').split('/');
+        document.getElementById('mvp-kills').value = kda[0] || 0;
+        document.getElementById('mvp-deaths').value = kda[1] || 0;
+        document.getElementById('mvp-assists').value = kda[2] || 0;
+        document.getElementById('mvp-gold').value = p.gold || 0;
+        document.getElementById('mvp-spell').value = p.spell || '';
+
+        const items = p.itemlist || [];
+        for (let i = 0; i < 6; i++) {
+            document.getElementById(`mvp-item${i + 1}`).value = (items[i] && items[i] !== 'idle') ? items[i] : '';
+        }
+    }
+
+    function populateMvpQuickFill() {
+        const sel = document.getElementById('mvp-quick-fill');
+        if (!sel) return;
+        sel.innerHTML = '<option value="">-- Select Player --</option>';
+        ['blue', 'red'].forEach(side => {
+            const teamKey = side === 'blue' ? 'blueteam' : 'redteam';
+            const teamName = matchData?.teamdata?.[teamKey]?.teamname || (side === 'blue' ? 'Blue' : 'Red');
+            const players = matchData?.teamdata?.[teamKey]?.playerlist || [];
+            players.slice(0, 5).forEach((p, i) => {
+                const o = document.createElement('option');
+                o.value = `${side}-${i}`;
+                o.textContent = `[${teamName}] ${p.name || 'Player ' + (i + 1)}`;
+                o.style.color = side === 'blue' ? '#1e88e5' : '#e53935';
+                sel.appendChild(o);
+            });
+        });
+    }
+
+    // Load existing MVP data on init
+    async function loadMvp() {
+        try {
+            const r = await fetch(`${OVERLAY}/api/mvp`);
+            const data = await r.json();
+            if (data?.mvp) {
+                const m = data.mvp;
+                document.getElementById('mvp-side').value = m.side || 'blue';
+                document.getElementById('mvp-role').value = m.role || 'gold';
+                document.getElementById('mvp-nickname').value = m.nickname || '';
+                if (m.heroImg) {
+                    mvpHeroImg = m.heroImg;
+                    const hero = heroList.find(h => h.img === m.heroImg);
+                    document.getElementById('mvp-hero-search').value = hero ? hero.name : '';
+                    document.getElementById('mvp-hero-preview').style.display = 'block';
+                    document.getElementById('mvp-hero-preview-img').src = m.heroImg;
+                    document.getElementById('mvp-hero-preview-name').textContent = hero ? hero.name : '';
+                }
+                if (m.stats) {
+                    document.getElementById('mvp-lvl').value = m.stats.LVL || '';
+                    const kda = (m.stats.KDA || '0/0/0').split('/');
+                    document.getElementById('mvp-kills').value = kda[0] || '';
+                    document.getElementById('mvp-deaths').value = kda[1] || '';
+                    document.getElementById('mvp-assists').value = kda[2] || '';
+                    document.getElementById('mvp-gold').value = m.stats.GOLD || '';
+                    document.getElementById('mvp-spell').value = m.stats.SPELL !== 'idle' ? (m.stats.SPELL || '') : '';
+                    for (let i = 1; i <= 6; i++) {
+                        const v = m.stats[`ITEM ${i}`];
+                        document.getElementById(`mvp-item${i}`).value = (v && v !== 'idle') ? v : '';
+                    }
+                }
+            }
+        } catch (e) {}
+        populateMvpQuickFill();
+    }
+
+    // Patch init to also load MVP and item/spell list
+    const _origInit = init;
+    init = async function() {
+        await _origInit();
+        await loadItemSpellList();
+        initMvpItemAutocomplete();
+        await loadMvp();
+    };
+
+    initTeamAutocomplete();
+    init();
+</script>
+</body>
+</html>

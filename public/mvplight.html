@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MVP Display - Battle of Souls</title>
+    <style>
+        @font-face {
+            font-family: 'BigNoodle';
+            src: url('Assets/Font/big_noodle_titling.ttf') format('truetype');
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --side-color: #a855f7;
+            --side-glow: rgba(168,85,247,0.3);
+            --blue: #1e88e5;
+            --blue-glow: rgba(30,136,229,0.4);
+            --red: #e53935;
+            --red-glow: rgba(229,57,53,0.4);
+        }
+
+        body {
+            font-family: 'BigNoodle', Impact, sans-serif;
+            width: 1920px;
+            height: 1080px;
+            overflow: hidden;
+            background: #0a0a0f;
+            color: #f0f0f0;
+        }
+
+        img[src=""], img:not([src]) { visibility: hidden; }
+
+        /* ===== DARK BACKGROUND ===== */
+        .bg-base {
+            position: fixed; inset: 0;
+            background: radial-gradient(ellipse 70% 70% at 50% 50%, #141420, #0a0a0f);
+            z-index: 0;
+        }
+        .bg-grid {
+            position: fixed; inset: 0;
+            background-image: linear-gradient(rgba(139,92,246,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(139,92,246,0.03) 1px, transparent 1px);
+            background-size: 60px 60px;
+            animation: gridDrift 30s linear infinite;
+            mask-image: radial-gradient(ellipse 70% 70% at 50% 50%, black 30%, transparent);
+            z-index: 0;
+        }
+        .orb { position: fixed; border-radius: 50%; filter: blur(150px); animation: orbFloat ease-in-out infinite; z-index: 0; }
+        .orb-1 { width: 600px; height: 600px; top: 20%; left: -5%; animation-duration: 20s; }
+        .orb-2 { width: 600px; height: 600px; top: 20%; right: -5%; animation-duration: 25s; animation-delay: -8s; }
+        .noise {
+            position: fixed; inset: 0; opacity: 0.03; pointer-events: none; z-index: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+            background-size: 200px;
+        }
+        .vignette { position: fixed; inset: 0; background: radial-gradient(ellipse 80% 80% at 50% 50%, transparent 50%, rgba(0,0,0,0.6)); pointer-events: none; z-index: 0; }
+        .scanline {
+            position: fixed; top: -2px; left: 0; right: 0; height: 1px;
+            background: linear-gradient(90deg, transparent 15%, rgba(139,92,246,0.04) 50%, transparent 85%);
+            animation: scanDown 10s linear infinite; z-index: 0;
+        }
+        .particles { position: fixed; inset: 0; overflow: hidden; pointer-events: none; z-index: 0; }
+        .particle { position: absolute; background: rgba(168,85,247,0.4); border-radius: 50%; animation: particleUp linear infinite; }
+
+        /* ===== MAIN LAYOUT ===== */
+        .main-display {
+            position: fixed; inset: 0; z-index: 10;
+            display: none;
+        }
+        .main-display.active { display: flex; }
+
+        /* ===== LEFT: HERO + PLAYER PHOTO ===== */
+        .left-visual {
+            width: 45%; height: 100%;
+            position: relative;
+            display: flex; align-items: flex-end; justify-content: center;
+            overflow: hidden;
+        }
+
+        .hero-bg {
+            position: absolute; inset: 0;
+            display: flex; align-items: flex-end; justify-content: center;
+        }
+        .hero-bg img {
+            height: 105%;
+            object-fit: cover; object-position: top center;
+            filter: brightness(0.7) saturate(1.2);
+            mask-image: linear-gradient(to right, transparent 0%, black 15%, black 80%, transparent 100%),
+                        linear-gradient(to bottom, black 70%, transparent 100%);
+            mask-composite: intersect;
+            -webkit-mask-composite: source-in;
+            animation: heroBreathe 4s ease-in-out infinite;
+            transform-origin: center 30%;
+        }
+
+        /* Side color glow behind hero */
+        .hero-side-glow {
+            position: absolute; bottom: 0; left: 0; right: 0; height: 60%;
+            background: linear-gradient(to top, var(--side-glow), transparent);
+            z-index: 2;
+        }
+
+        /* Role badge at bottom of hero visual */
+        .role-badge {
+            position: absolute; bottom: 50px; left: 50%; transform: translateX(-50%);
+            z-index: 5; display: flex; flex-direction: column; align-items: center; gap: 8px;
+            opacity: 0;
+            animation: fadeSlideUp 0.6s ease 0.4s forwards;
+        }
+        .role-icon {
+            width: 70px; height: 70px;
+            border: 2px solid var(--side-color);
+            border-radius: 50%;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(10px);
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 0 25px var(--side-glow);
+        }
+        .role-icon img {
+            width: 40px; height: 40px;
+            object-fit: contain;
+            filter: brightness(0) invert(1) opacity(0.8);
+        }
+        .role-name {
+            font-size: 0.75rem; letter-spacing: 5px;
+            text-transform: uppercase;
+            color: var(--side-color);
+            text-shadow: 0 0 10px var(--side-glow);
+        }
+        .lvl-tag {
+            font-size: 0.9rem; letter-spacing: 3px;
+            color: rgba(255,255,255,0.4);
+        }
+
+        /* ===== RIGHT: STATS PANEL ===== */
+        .right-stats {
+            width: 55%; height: 100%;
+            display: flex; flex-direction: column;
+            justify-content: center;
+            padding: 0 80px 0 60px;
+            position: relative;
+        }
+
+        .stats-inner {
+            display: flex; flex-direction: column;
+            gap: 0;
+        }
+
+        /* MVP Title */
+        .mvp-title {
+            font-size: 7rem; letter-spacing: 12px;
+            text-transform: uppercase;
+            color: #fff;
+            line-height: 1;
+            text-shadow: 0 0 40px var(--side-glow), 3px 3px 0 rgba(0,0,0,0.5);
+            margin-bottom: 6px;
+            opacity: 0;
+            animation: fadeSlideUp 0.6s ease 0.3s forwards;
+        }
+
+        /* Divider */
+        .mvp-divider {
+            width: 300px; height: 2px;
+            background: linear-gradient(90deg, var(--side-color), transparent);
+            margin-bottom: 16px;
+            opacity: 0;
+            animation: expandIn 0.8s ease 0.5s forwards;
+            transform-origin: left;
+            transform: scaleX(0);
+        }
+
+        /* Player Name */
+        .player-name {
+            font-size: 4.5rem; letter-spacing: 4px;
+            text-transform: uppercase;
+            color: #fff;
+            line-height: 1;
+            text-shadow: 3px 3px 0 rgba(0,0,0,0.8);
+            margin-bottom: 32px;
+            opacity: 0;
+            animation: nameReveal 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.5s forwards;
+        }
+
+        /* KDA Section */
+        .kda-section {
+            display: flex; align-items: flex-start; gap: 60px;
+            margin-bottom: 32px;
+            opacity: 0;
+            animation: fadeSlideUp 0.5s ease 0.7s forwards;
+        }
+
+        .stat-block {
+            display: flex; flex-direction: column;
+        }
+        .stat-label {
+            font-size: 1.1rem; letter-spacing: 5px;
+            color: var(--side-color);
+            margin-bottom: 6px;
+            text-shadow: 0 0 10px var(--side-glow);
+        }
+        .kda-value {
+            font-size: 4.5rem; line-height: 1;
+            color: #fff;
+            text-shadow: 2px 2px 0 rgba(0,0,0,0.6), 0 0 30px rgba(255,255,255,0.08);
+        }
+        .kda-value .slash {
+            color: rgba(255,255,255,0.2);
+            margin: 0 4px;
+        }
+
+        .gold-value {
+            font-size: 4rem; line-height: 1;
+            color: #fff;
+            text-shadow: 2px 2px 0 rgba(0,0,0,0.6);
+        }
+        .gold-value .gold-icon {
+            display: inline-block; width: 30px; height: 30px;
+            background: #f59e0b; border-radius: 50%;
+            vertical-align: middle; margin-right: 10px;
+            box-shadow: 0 0 12px rgba(245,158,11,0.5);
+        }
+
+        /* Items Row */
+        .items-section {
+            display: inline-flex; align-items: center; gap: 0;
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 12px;
+            padding: 12px 16px;
+            backdrop-filter: blur(8px);
+            opacity: 0;
+            animation: fadeSlideUp 0.5s ease 0.85s forwards;
+            align-self: flex-start;
+        }
+
+        .spell-slot {
+            width: 60px; height: 60px;
+            border: 2px solid var(--side-color);
+            border-radius: 50%;
+            overflow: hidden;
+            margin-right: 18px;
+            flex-shrink: 0;
+            box-shadow: 0 0 15px var(--side-glow);
+        }
+        .spell-slot img { width: 100%; height: 100%; object-fit: cover; }
+
+        .items-divider {
+            width: 1px; height: 50px;
+            background: rgba(255,255,255,0.08);
+            margin-right: 18px;
+            flex-shrink: 0;
+        }
+
+        .items-grid {
+            display: flex; gap: 8px;
+        }
+        .item-box {
+            width: 60px; height: 60px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+        .item-box img { width: 100%; height: 100%; object-fit: cover; }
+        .item-box::after {
+            content: ''; position: absolute; inset: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.05), transparent);
+            pointer-events: none;
+        }
+
+        /* Watermark removed */
+
+        /* ===== CORNER BRACKETS ===== */
+        .bracket { position: fixed; width: 40px; height: 40px; z-index: 15; opacity: 0; animation: bracketIn 0.5s ease 0.9s forwards; }
+        .bracket::before, .bracket::after { content: ''; position: absolute; background: rgba(255,255,255,0.08); }
+        .bracket-tl { top: 30px; left: 30px; } .bracket-tl::before { top: 0; left: 0; width: 20px; height: 1px; } .bracket-tl::after { top: 0; left: 0; width: 1px; height: 20px; }
+        .bracket-tr { top: 30px; right: 30px; } .bracket-tr::before { top: 0; right: 0; width: 20px; height: 1px; } .bracket-tr::after { top: 0; right: 0; width: 1px; height: 20px; }
+        .bracket-bl { bottom: 30px; left: 30px; } .bracket-bl::before { bottom: 0; left: 0; width: 20px; height: 1px; } .bracket-bl::after { bottom: 0; left: 0; width: 1px; height: 20px; }
+        .bracket-br { bottom: 30px; right: 30px; } .bracket-br::before { bottom: 0; right: 0; width: 20px; height: 1px; } .bracket-br::after { bottom: 0; right: 0; width: 1px; height: 20px; }
+
+        /* Bottom accent line */
+        .bottom-line {
+            position: fixed; bottom: 0; left: 0; right: 0; height: 2px; z-index: 15;
+            background: linear-gradient(90deg, transparent, var(--side-color), transparent);
+            background-size: 200% 100%;
+            animation: borderFlow 4s linear infinite;
+            opacity: 0.5;
+        }
+
+        /* Side glow line */
+        .side-line {
+            position: fixed; top: 0; bottom: 0; width: 3px; z-index: 15;
+            opacity: 0; animation: sideLineIn 0.6s ease 0.4s forwards;
+        }
+        .side-line-left { left: 0; background: linear-gradient(180deg, transparent, var(--side-color), transparent); }
+
+        /* ===== BATTLE OF SOULS BRANDING ===== */
+        .branding {
+            position: fixed; top: 25px; right: 45px; z-index: 15;
+            text-align: right;
+            opacity: 0;
+            animation: fadeSlideUp 0.5s ease 1s forwards;
+        }
+        .branding-title {
+            font-size: 2.4rem; letter-spacing: 8px;
+            color: rgba(255,255,255,0.7);
+            text-transform: uppercase;
+            text-shadow: 0 0 20px rgba(168,85,247,0.15);
+        }
+        .branding-sub {
+            font-size: 0.75rem; letter-spacing: 5px;
+            color: rgba(255,255,255,0.25);
+            text-transform: uppercase;
+        }
+
+        /* ===== ANIMATIONS ===== */
+        @keyframes gridDrift { from { transform: translate(0,0); } to { transform: translate(60px,60px); } }
+        @keyframes orbFloat {
+            0%, 100% { transform: translate(0,0) scale(1); }
+            50% { transform: translate(30px,-20px) scale(1.05); }
+        }
+        @keyframes scanDown { from { top: -2px; } to { top: 1082px; } }
+        @keyframes particleUp {
+            0% { transform: translateY(1100px); opacity: 0; }
+            5% { opacity: 0.6; } 95% { opacity: 0.6; }
+            100% { transform: translateY(-20px); opacity: 0; }
+        }
+        @keyframes heroBreathe {
+            0%, 100% { transform: scale(1); filter: brightness(0.7) saturate(1.2); }
+            50% { transform: scale(1.03); filter: brightness(0.75) saturate(1.3); }
+        }
+        @keyframes fadeSlideUp {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes expandIn { from { transform: scaleX(0); opacity: 0; } to { transform: scaleX(1); opacity: 1; } }
+        @keyframes nameReveal {
+            from { opacity: 0; transform: translateX(-30px); filter: blur(8px); }
+            to { opacity: 1; transform: translateX(0); filter: blur(0); }
+        }
+        @keyframes bracketIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes borderFlow { 0% { background-position: 0% 0; } 100% { background-position: 200% 0; } }
+        @keyframes sideLineIn { from { opacity: 0; } to { opacity: 0.6; } }
+        @keyframes breathe {
+            0%, 100% { opacity: 0.7; } 50% { opacity: 1; }
+        }
+        @keyframes shimmer {
+            0% { left: -100%; }
+            100% { left: 200%; }
+        }
+
+        /* ===== ENTRANCE RETRIGGER CLASS ===== */
+        .retrigger { animation: none !important; }
+    </style>
+</head>
+<body>
+
+    <!-- Background -->
+    <div class="bg-base"></div>
+    <div class="bg-grid"></div>
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="noise"></div>
+    <div class="vignette"></div>
+    <div class="scanline"></div>
+    <div class="particles" id="particles"></div>
+
+    <!-- Main Display -->
+    <div class="main-display" id="mainDisplay">
+
+        <!-- Left: Hero visual -->
+        <div class="left-visual">
+            <div class="hero-bg">
+                <img id="heroFullImg" src="" alt="">
+            </div>
+            <div class="hero-side-glow"></div>
+            <div class="role-badge">
+                <div class="role-icon">
+                    <img id="roleIcon" src="" alt="">
+                </div>
+                <div class="role-name" id="roleName">GOLD</div>
+                <div class="lvl-tag">LV. <span id="mvpLvl">15</span></div>
+            </div>
+        </div>
+
+        <!-- Right: Stats -->
+        <div class="right-stats">
+            <div class="stats-inner">
+                <div class="mvp-title">MVP</div>
+                <div class="mvp-divider"></div>
+                <div class="player-name" id="mvpName">PLAYER</div>
+
+                <div class="kda-section">
+                    <div class="stat-block">
+                        <div class="stat-label">K / D / A</div>
+                        <div class="kda-value" id="mvpKda">0<span class="slash">/</span>0<span class="slash">/</span>0</div>
+                    </div>
+                    <div class="stat-block">
+                        <div class="stat-label">GOLD EARNED</div>
+                        <div class="gold-value" id="mvpGold"><span class="gold-icon"></span>0</div>
+                    </div>
+                </div>
+
+                <div class="items-section">
+                    <div class="spell-slot" id="spellSlot"></div>
+                    <div class="items-divider"></div>
+                    <div class="items-grid" id="itemsGrid"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Branding -->
+    <div class="branding">
+        <div class="branding-title">Battle of Souls</div>
+        <div class="branding-sub">Where Legends Rise</div>
+    </div>
+
+    <!-- Corner brackets -->
+    <div class="bracket bracket-tl"></div>
+    <div class="bracket bracket-tr"></div>
+    <div class="bracket bracket-bl"></div>
+    <div class="bracket bracket-br"></div>
+    <div class="bottom-line"></div>
+    <div class="side-line side-line-left"></div>
+
+    <script>
+        // ===== PARTICLES =====
+        const pEl = document.getElementById('particles');
+        for (let i = 0; i < 20; i++) {
+            const p = document.createElement('div');
+            p.className = 'particle';
+            p.style.left = Math.random() * 100 + '%';
+            p.style.animationDuration = (10 + Math.random() * 15) + 's';
+            p.style.animationDelay = -(Math.random() * 20) + 's';
+            const size = 1 + Math.random() * 2;
+            p.style.width = size + 'px';
+            p.style.height = size + 'px';
+            pEl.appendChild(p);
+        }
+
+        // ===== SIDE COLOR =====
+        function setSideColor(side) {
+            const root = document.documentElement;
+            if (side === 'blue') {
+                root.style.setProperty('--side-color', '#1e88e5');
+                root.style.setProperty('--side-glow', 'rgba(30,136,229,0.4)');
+                document.querySelector('.orb-1').style.background = 'rgba(21,101,192,0.12)';
+                document.querySelector('.orb-2').style.background = 'rgba(139,92,246,0.06)';
+            } else {
+                root.style.setProperty('--side-color', '#e53935');
+                root.style.setProperty('--side-glow', 'rgba(229,57,53,0.4)');
+                document.querySelector('.orb-1').style.background = 'rgba(198,40,40,0.12)';
+                document.querySelector('.orb-2').style.background = 'rgba(139,92,246,0.06)';
+            }
+        }
+
+        // ===== FORMAT GOLD =====
+        function formatGold(g) {
+            const n = parseInt(g) || 0;
+            if (n >= 1000) return (n / 1000).toFixed(1) + 'K';
+            return String(n);
+        }
+
+        // ===== FORMAT KDA =====
+        function formatKda(kda) {
+            if (!kda) return '0<span class="slash">/</span>0<span class="slash">/</span>0';
+            const parts = String(kda).split('/');
+            if (parts.length === 3) {
+                return parts[0] + '<span class="slash">/</span>' + parts[1] + '<span class="slash">/</span>' + parts[2];
+            }
+            return kda;
+        }
+
+        // ===== UPDATE DISPLAY =====
+        const mainDisplay = document.getElementById('mainDisplay');
+
+        function updateMvpDisplay(data) {
+            if (!data) {
+                mainDisplay.classList.remove('active');
+                return;
+            }
+            mainDisplay.classList.add('active');
+
+            // Side color
+            setSideColor(data.side || 'blue');
+
+            // Hero image
+            document.getElementById('heroFullImg').src = data.heroImg || '';
+
+            // Role
+            const role = (data.role || 'gold').toLowerCase();
+            const roleMap = { gold: 'Gold', jungle: 'Jungle', junggle: 'Jungle', mid: 'Mid', roam: 'Roam', exp: 'Exp' };
+            const roleFileMap = { gold: 'gold', jungle: 'junggle', junggle: 'junggle', mid: 'mid', roam: 'roam', exp: 'exp' };
+            const roleName = roleMap[role] || 'Gold';
+            document.getElementById('roleName').textContent = roleName.toUpperCase();
+            document.getElementById('roleIcon').src = `Assets/lane/${roleFileMap[role] || 'gold'}.png`;
+            document.getElementById('roleIcon').onerror = function() { this.style.display = 'none'; };
+
+            // Level
+            document.getElementById('mvpLvl').textContent = data.stats?.LVL || '15';
+
+            // Player name
+            document.getElementById('mvpName').textContent = data.nickname || 'PLAYER';
+
+            // KDA
+            document.getElementById('mvpKda').innerHTML = formatKda(data.stats?.KDA);
+
+            // Gold
+            document.getElementById('mvpGold').innerHTML = '<span class="gold-icon"></span>' + formatGold(data.stats?.GOLD);
+
+            // Spell
+            const spellSlot = document.getElementById('spellSlot');
+            spellSlot.innerHTML = '';
+            if (data.stats?.SPELL && data.stats.SPELL !== 'idle') {
+                const img = document.createElement('img');
+                img.src = `Assets/Itemandspell/${data.stats.SPELL}.png`;
+                img.onerror = () => img.style.display = 'none';
+                spellSlot.appendChild(img);
+            }
+
+            // Items
+            const itemsGrid = document.getElementById('itemsGrid');
+            itemsGrid.innerHTML = '';
+            for (let i = 1; i <= 6; i++) {
+                const box = document.createElement('div');
+                box.className = 'item-box';
+                const itemName = data.stats?.[`ITEM ${i}`];
+                if (itemName && itemName !== 'idle') {
+                    const img = document.createElement('img');
+                    img.src = `Assets/Itemandspell/${itemName}.png`;
+                    img.onerror = () => img.style.display = 'none';
+                    box.appendChild(img);
+                }
+                itemsGrid.appendChild(box);
+            }
+
+            // Retrigger animations
+            retriggerAnimations();
+        }
+
+        function retriggerAnimations() {
+            const animated = document.querySelectorAll('.mvp-title, .mvp-divider, .player-name, .kda-section, .items-section, .role-badge, .branding');
+            animated.forEach(el => {
+                el.style.animation = 'none';
+                void el.offsetWidth;
+                el.style.animation = '';
+            });
+        }
+
+        // ===== WEBSOCKET =====
+        function connectWS() {
+            const ws = new WebSocket(`ws://${location.host}`);
+            ws.onopen = () => fetchMvp();
+            ws.onmessage = (e) => {
+                try {
+                    const msg = JSON.parse(e.data);
+                    if (msg.type === 'mvp_update') updateMvpDisplay(msg.data);
+                } catch(e) {}
+            };
+            ws.onclose = () => setTimeout(connectWS, 3000);
+        }
+
+        async function fetchMvp() {
+            try {
+                const r = await fetch('/api/mvp');
+                const data = await r.json();
+                if (data?.mvp) updateMvpDisplay(data.mvp);
+            } catch(e) {}
+        }
+
+        connectWS();
+    </script>
+</body>
+</html>
