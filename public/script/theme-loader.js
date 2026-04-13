@@ -1,4 +1,5 @@
-const socketTheme = new WebSocket(`ws://${window.location.host}`);
+const _themeProto = window.location.protocol === 'https:' ? 'wss' : 'ws';
+const socketTheme = new WebSocket(`${_themeProto}://${window.location.host}`);
 
 async function loadTheme() {
     try {

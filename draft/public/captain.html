@@ -139,6 +139,20 @@
 
         .slots-wrap { display: flex; gap: 5px; flex: 1; }
 
+        /* Slot wrapper — image + name label stacked */
+        .hslot-wrap {
+            display: flex; flex-direction: column; align-items: center; gap: 3px;
+            flex-shrink: 0;
+        }
+        .hslot-name {
+            font-size: 8px; font-weight: 700; letter-spacing: 0.5px;
+            color: var(--muted); text-align: center; text-transform: uppercase;
+            max-width: var(--slot); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+            line-height: 1; min-height: 10px;
+        }
+        .hslot-name.ban-name  { color: #ff6b6b; }
+        .hslot-name.pick-name { color: #86efac; }
+
         /* Individual hero slot */
         .hslot {
             width: var(--slot); height: var(--slot);
@@ -146,12 +160,12 @@
             border: 1.5px solid var(--border);
             background: rgba(255,255,255,0.03);
             overflow: hidden; position: relative;
-            flex-shrink: 0;
             display: flex; align-items: center; justify-content: center;
             transition: border-color 0.2s, box-shadow 0.2s;
         }
         .hslot img {
             width: 100%; height: 100%; object-fit: cover; display: block;
+            loading: lazy;
         }
         .hslot .slot-num {
             font-size: 14px; font-weight: 700; color: rgba(255,255,255,0.1);
@@ -168,16 +182,9 @@
             50%    { box-shadow: 0 0 20px rgba(139,92,246,0.9), 0 0 40px rgba(139,92,246,0.3); }
         }
 
-        /* Banned hero — darkened + red ✕ */
-        .hslot.banned img { filter: grayscale(1) brightness(0.35); }
-        .hslot.banned::after {
-            content: '✕';
-            position: absolute; inset: 0;
-            display: flex; align-items: center; justify-content: center;
-            color: #ff4444; font-size: 18px; font-weight: 900;
-            text-shadow: 0 0 10px rgba(255,68,68,0.9);
-            pointer-events: none;
-        }
+        /* Banned hero — red tint, no dark gray */
+        .hslot.banned img { filter: grayscale(0.6) brightness(0.55); }
+        .hslot.banned { border-color: rgba(255,68,68,0.5) !important; }
 
         /* ===== SEARCH + FILTER ===== */
         .search-section {
@@ -601,11 +608,21 @@ function show(id) {
 // ============================================================
 //  SLOTS
 // ============================================================
+function getHeroName(imgSrc) {
+    if (!imgSrc) return '';
+    const hero = heroList.find(h => h.img === imgSrc);
+    return hero ? hero.name : imgSrc.split('/').pop().replace(/\.[^.]+$/, '');
+}
+
 function renderSlots(containerId, heroes, type, sideKey) {
     const c = document.getElementById(containerId);
     c.innerHTML = '';
 
     heroes.forEach((h, i) => {
+        // Outer wrapper: image + name label
+        const wrap = document.createElement('div');
+        wrap.className = 'hslot-wrap';
+
         const slot = document.createElement('div');
         slot.className = 'hslot';
 
@@ -618,20 +635,32 @@ function renderSlots(containerId, heroes, type, sideKey) {
             }
         }
 
+        const nameLabel = document.createElement('div');
+        nameLabel.className = 'hslot-name';
+
         if (h) {
             const img = document.createElement('img');
             img.src = h;
             img.loading = 'lazy';
             slot.appendChild(img);
-            if (type === 'ban') slot.classList.add('banned');
+            if (type === 'ban') {
+                slot.classList.add('banned');
+                nameLabel.classList.add('ban-name');
+            } else {
+                nameLabel.classList.add('pick-name');
+            }
+            nameLabel.textContent = getHeroName(h);
         } else {
             const num = document.createElement('span');
             num.className = 'slot-num';
             num.textContent = i + 1;
             slot.appendChild(num);
+            nameLabel.textContent = '';
         }
 
-        c.appendChild(slot);
+        wrap.appendChild(slot);
+        wrap.appendChild(nameLabel);
+        c.appendChild(wrap);
     });
 }
 

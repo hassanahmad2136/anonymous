@@ -426,13 +426,22 @@ body {
 .ban{
     width: 160px;
     height: 65px;
-    background-color: aqua;
-    border: 1px solid #ffffff;
+    background-color: transparent;
+    border: 1px solid rgba(255,255,255,0.15);
     background-image: url(Assets/Other/ban.png);
     background-size: 100%;
     position: relative;
     overflow: hidden;
     display: flex;
+}
+
+/* Banned hero — show clearly, no gray, no cross */
+.ban.banned .image-box img {
+    filter: none !important;
+    opacity: 0.9 !important;
+}
+.ban.banned::after {
+    display: none !important;
 }
 
 

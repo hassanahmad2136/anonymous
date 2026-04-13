@@ -553,7 +553,7 @@
 
         // ===== WEBSOCKET =====
         function connectWS() {
-            const ws = new WebSocket(`ws://${location.host}`);
+            const ws = new WebSocket(`${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}`);
             ws.onopen = () => fetchMvp();
             ws.onmessage = (e) => {
                 try {

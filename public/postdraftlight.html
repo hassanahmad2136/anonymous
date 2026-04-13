@@ -141,20 +141,54 @@
             margin-right: 10px;
         }
 
-        /* ===== HERO PICKS ===== */
+        /* ===== HERO PICKS — HORIZONTAL CARD LAYOUT ===== */
         .middle {
             width: 1920px;
             flex: 1;
             display: flex;
+            flex-direction: column;
             justify-content: center;
+            padding: 8px 40px;
+            gap: 10px;
+        }
+
+        /* Each team row */
+        .team-row {
+            display: flex;
             align-items: stretch;
-            padding: 10px 40px 0;
-            gap: 5px;
+            gap: 6px;
+            height: 390px;
+        }
+
+        /* Team label on far left/right */
+        .team-label-col {
+            width: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .team-label-col span {
+            font-size: 11px;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            writing-mode: vertical-lr;
+            text-orientation: mixed;
+            opacity: 0.45;
+        }
+        .team-label-col.blue span { color: var(--blue); }
+        .team-label-col.red span  { color: var(--red); }
+
+        /* Cards container */
+        .cards-row {
+            display: flex;
+            flex: 1;
+            gap: 6px;
+            align-items: stretch;
         }
 
         .pick {
             flex: 1;
-            max-width: 168px;
             border: 1px solid var(--border);
             background: rgba(255,255,255,0.03);
             overflow: hidden;
@@ -162,17 +196,18 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            border-radius: 8px;
+            border-radius: 10px;
+            min-width: 0;
         }
 
-        /* Blue picks glow */
-        .middle .pick:nth-child(-n+5) {
+        /* Blue row cards */
+        .blue-row .pick {
             border-top: 2px solid rgba(30,136,229,0.4);
             box-shadow: inset 0 1px 15px rgba(30,136,229,0.06);
         }
-        /* Red picks glow */
-        .middle .pick:nth-child(n+7) {
-            border-top: 2px solid rgba(229,57,53,0.4);
+        /* Red row cards */
+        .red-row .pick {
+            border-bottom: 2px solid rgba(229,57,53,0.4);
             box-shadow: inset 0 1px 15px rgba(229,57,53,0.06);
         }
 
@@ -202,39 +237,35 @@
 
         .name-image-box { position: absolute; z-index: 2; display: none; }
 
-        /* Center divider */
+        /* Center divider between team rows */
         .pickmid {
-            width: 50px;
+            height: 36px;
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
-            flex-shrink: 0;
-            gap: 8px;
+            gap: 20px;
         }
         .pickmid-vs {
-            font-size: 22px;
-            letter-spacing: 3px;
+            font-size: 20px;
+            letter-spacing: 6px;
             color: var(--red);
             opacity: 0.5;
         }
         .pickmid-inner {
-            font-size: 11px;
+            font-size: 10px;
             letter-spacing: 4px;
             color: var(--text-muted);
-            writing-mode: vertical-lr;
-            text-orientation: mixed;
             text-transform: uppercase;
         }
 
         /* Player Nicknames — bottom of card */
         .bluenick, .rednick {
             position: absolute;
-            bottom: 12px;
+            bottom: 10px;
             left: 0;
             right: 0;
             z-index: 5;
-            font-size: 18px;
+            font-size: 15px;
             color: #fff;
             text-align: center;
             letter-spacing: 2px;
@@ -500,71 +531,84 @@
     </div>
 
     <div class="middle">
-        <div class="pick">
-            <div class="lanelogo bluelane"><img id="player-lane-1-blue" class="lane-icon" src="Assets/lane/none.png" alt=""></div>
-            <div id="name-box-3" class="bluenick"></div>
-            <div class="name-image-box" id="name-image-box-3"></div>
-            <div id="image-box-1" class="image-box"><img id="image-display-1" src=""></div>
-        </div>
-        <div class="pick">
-            <div class="lanelogo bluelane"><img id="player-lane-2-blue" class="lane-icon" src="Assets/lane/none.png" alt=""></div>
-            <div id="name-box-4" class="bluenick"></div>
-            <div class="name-image-box" id="name-image-box-4"></div>
-            <div id="image-box-2" class="image-box"><img id="image-display-2" src=""></div>
-        </div>
-        <div class="pick">
-            <div class="lanelogo bluelane"><img id="player-lane-3-blue" class="lane-icon" src="Assets/lane/none.png" alt=""></div>
-            <div id="name-box-5" class="bluenick"></div>
-            <div class="name-image-box" id="name-image-box-5"></div>
-            <div id="image-box-3" class="image-box"><img id="image-display-3" src=""></div>
-        </div>
-        <div class="pick">
-            <div class="lanelogo bluelane"><img id="player-lane-4-blue" class="lane-icon" src="Assets/lane/none.png" alt=""></div>
-            <div id="name-box-6" class="bluenick"></div>
-            <div class="name-image-box" id="name-image-box-6"></div>
-            <div id="image-box-4" class="image-box"><img id="image-display-4" src=""></div>
-        </div>
-        <div class="pick">
-            <div class="lanelogo bluelane"><img id="player-lane-5-blue" class="lane-icon" src="Assets/lane/none.png" alt=""></div>
-            <div id="name-box-7" class="bluenick"></div>
-            <div class="name-image-box" id="name-image-box-7"></div>
-            <div id="image-box-5" class="image-box"><img id="image-display-5" src=""></div>
+        <!-- BLUE TEAM ROW — top 5 -->
+        <div class="team-row blue-row">
+            <div class="team-label-col blue"><span>Blue Team</span></div>
+            <div class="cards-row">
+                <div class="pick">
+                    <div class="lanelogo bluelane"><img id="player-lane-1-blue" class="lane-icon" src="Assets/lane/none.png" alt=""></div>
+                    <div id="name-box-3" class="bluenick"></div>
+                    <div class="name-image-box" id="name-image-box-3"></div>
+                    <div id="image-box-1" class="image-box"><img id="image-display-1" src=""></div>
+                </div>
+                <div class="pick">
+                    <div class="lanelogo bluelane"><img id="player-lane-2-blue" class="lane-icon" src="Assets/lane/none.png" alt=""></div>
+                    <div id="name-box-4" class="bluenick"></div>
+                    <div class="name-image-box" id="name-image-box-4"></div>
+                    <div id="image-box-2" class="image-box"><img id="image-display-2" src=""></div>
+                </div>
+                <div class="pick">
+                    <div class="lanelogo bluelane"><img id="player-lane-3-blue" class="lane-icon" src="Assets/lane/none.png" alt=""></div>
+                    <div id="name-box-5" class="bluenick"></div>
+                    <div class="name-image-box" id="name-image-box-5"></div>
+                    <div id="image-box-3" class="image-box"><img id="image-display-3" src=""></div>
+                </div>
+                <div class="pick">
+                    <div class="lanelogo bluelane"><img id="player-lane-4-blue" class="lane-icon" src="Assets/lane/none.png" alt=""></div>
+                    <div id="name-box-6" class="bluenick"></div>
+                    <div class="name-image-box" id="name-image-box-6"></div>
+                    <div id="image-box-4" class="image-box"><img id="image-display-4" src=""></div>
+                </div>
+                <div class="pick">
+                    <div class="lanelogo bluelane"><img id="player-lane-5-blue" class="lane-icon" src="Assets/lane/none.png" alt=""></div>
+                    <div id="name-box-7" class="bluenick"></div>
+                    <div class="name-image-box" id="name-image-box-7"></div>
+                    <div id="image-box-5" class="image-box"><img id="image-display-5" src=""></div>
+                </div>
+            </div>
         </div>
 
+        <!-- CENTER DIVIDER -->
         <div class="pickmid">
             <div class="pickmid-vs">VS</div>
             <div class="pickmid-inner">Post Draft</div>
         </div>
 
-        <div class="pick">
-            <div class="lanelogo redlane"><img id="player-lane-5-red" class="lane-icon" src="Assets/lane/none.png" alt=""></div>
-            <div id="name-box-14" class="rednick"></div>
-            <div class="name-image-box" id="name-image-box-14"></div>
-            <div id="image-box-10" class="image-box"><img id="image-display-10" src=""></div>
-        </div>
-        <div class="pick">
-            <div class="lanelogo redlane"><img id="player-lane-4-red" class="lane-icon" src="Assets/lane/none.png" alt=""></div>
-            <div id="name-box-13" class="rednick"></div>
-            <div class="name-image-box" id="name-image-box-13"></div>
-            <div id="image-box-9" class="image-box"><img id="image-display-9" src=""></div>
-        </div>
-        <div class="pick">
-            <div class="lanelogo redlane"><img id="player-lane-3-red" class="lane-icon" src="Assets/lane/none.png" alt=""></div>
-            <div id="name-box-12" class="rednick"></div>
-            <div class="name-image-box" id="name-image-box-12"></div>
-            <div id="image-box-8" class="image-box"><img id="image-display-8" src=""></div>
-        </div>
-        <div class="pick">
-            <div class="lanelogo redlane"><img id="player-lane-2-red" class="lane-icon" src="Assets/lane/none.png" alt=""></div>
-            <div id="name-box-11" class="rednick"></div>
-            <div class="name-image-box" id="name-image-box-11"></div>
-            <div id="image-box-7" class="image-box"><img id="image-display-7" src=""></div>
-        </div>
-        <div class="pick">
-            <div class="lanelogo redlane"><img id="player-lane-1-red" class="lane-icon" src="Assets/lane/none.png" alt=""></div>
-            <div id="name-box-10" class="rednick"></div>
-            <div class="name-image-box" id="name-image-box-10"></div>
-            <div id="image-box-6" class="image-box"><img id="image-display-6" src=""></div>
+        <!-- RED TEAM ROW — bottom 5 -->
+        <div class="team-row red-row">
+            <div class="team-label-col red"><span>Red Team</span></div>
+            <div class="cards-row">
+                <div class="pick">
+                    <div class="lanelogo redlane"><img id="player-lane-1-red" class="lane-icon" src="Assets/lane/none.png" alt=""></div>
+                    <div id="name-box-10" class="rednick"></div>
+                    <div class="name-image-box" id="name-image-box-10"></div>
+                    <div id="image-box-6" class="image-box"><img id="image-display-6" src=""></div>
+                </div>
+                <div class="pick">
+                    <div class="lanelogo redlane"><img id="player-lane-2-red" class="lane-icon" src="Assets/lane/none.png" alt=""></div>
+                    <div id="name-box-11" class="rednick"></div>
+                    <div class="name-image-box" id="name-image-box-11"></div>
+                    <div id="image-box-7" class="image-box"><img id="image-display-7" src=""></div>
+                </div>
+                <div class="pick">
+                    <div class="lanelogo redlane"><img id="player-lane-3-red" class="lane-icon" src="Assets/lane/none.png" alt=""></div>
+                    <div id="name-box-12" class="rednick"></div>
+                    <div class="name-image-box" id="name-image-box-12"></div>
+                    <div id="image-box-8" class="image-box"><img id="image-display-8" src=""></div>
+                </div>
+                <div class="pick">
+                    <div class="lanelogo redlane"><img id="player-lane-4-red" class="lane-icon" src="Assets/lane/none.png" alt=""></div>
+                    <div id="name-box-13" class="rednick"></div>
+                    <div class="name-image-box" id="name-image-box-13"></div>
+                    <div id="image-box-9" class="image-box"><img id="image-display-9" src=""></div>
+                </div>
+                <div class="pick">
+                    <div class="lanelogo redlane"><img id="player-lane-5-red" class="lane-icon" src="Assets/lane/none.png" alt=""></div>
+                    <div id="name-box-14" class="rednick"></div>
+                    <div class="name-image-box" id="name-image-box-14"></div>
+                    <div id="image-box-10" class="image-box"><img id="image-display-10" src=""></div>
+                </div>
+            </div>
         </div>
     </div>
 </div>

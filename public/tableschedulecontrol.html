@@ -482,7 +482,7 @@
 
         let timerWS = null;
         function connectTimerWS() {
-            timerWS = new WebSocket(`ws://${location.host}`);
+            timerWS = new WebSocket(`${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}`);
             timerWS.onclose = () => setTimeout(connectTimerWS, 3000);
         }
         connectTimerWS();

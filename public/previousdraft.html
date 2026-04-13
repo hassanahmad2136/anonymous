@@ -205,7 +205,7 @@
     // Timer/Interval
     let fetchInterval = null; 
 
-    const ws = new WebSocket('ws://' + window.location.host);
+    const ws = new WebSocket((location.protocol === 'https:' ? 'wss' : 'ws') + '://' + window.location.host);
 
     // --- HELPER: PARSE JSON STRUCTURE ---
     function parseTeamData(teamObj) {

@@ -1,7 +1,8 @@
 // public/script/displaynicknamelogo.js
 
 // 1. Inisialisasi WebSocket ke Server
-const socket = new WebSocket(`ws://${window.location.host}`);
+const _wsProto = window.location.protocol === 'https:' ? 'wss' : 'ws';
+const socket = new WebSocket(`${_wsProto}://${window.location.host}`);
 
 // 2. Fungsi untuk mengambil data dari Server (matchdatateam.json)
 async function fetchDataAndUpdate() {

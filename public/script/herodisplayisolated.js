@@ -1,5 +1,5 @@
 // Inisialisasi WebSocket khusus untuk Hero Display
-const wsHero = new WebSocket('ws://localhost:3000');
+const wsHero = new WebSocket(`${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}`);
 let lastPlayed = {}; // Untuk melacak suara agar tidak spam
 
 // --- FUNGSI UTAMA: MENGAMBIL DATA DARI SERVER ---
