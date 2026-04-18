@@ -178,12 +178,14 @@ function updateDisplay(newData) {
                          }
                      }
                 }
+                // Remove pending if this slot is now locked
+                boxElement.classList.remove('pending');
                 imgElement.style.display = "";
                 boxElement.classList.add("show");
             } else {
                 imgElement.src = "";
                 imgElement.style.opacity = "0";
-                boxElement.classList.remove("show");
+                boxElement.classList.remove("show", "pending");
                 lastPlayed[i] = null;
 
                 // Remove confirmed/flash for picks
@@ -195,6 +197,47 @@ function updateDisplay(newData) {
                 if (i >= 11 && i <= 20) {
                     const banEl = boxElement.closest('.ban');
                     if (banEl) banEl.classList.remove('banned');
+                }
+            }
+        }
+    }
+
+    // --- DIMMED PENDING PREVIEW (selected but not yet locked) ---
+    const selectedHero = newData.selected_hero;
+    const currentPhaseIndex = parseInt(newData.current_phase) || 0;
+
+    if (selectedHero && typeof phasesActiveBoxes !== 'undefined' && currentPhaseIndex < phasesActiveBoxes.length - 1) {
+        const activeBoxId = (phasesActiveBoxes[currentPhaseIndex] && phasesActiveBoxes[currentPhaseIndex][0]) || '';
+        let pendingImgSrc = null;
+        let slotRange = null;
+
+        if (activeBoxId.startsWith('ban-left')) {
+            pendingImgSrc = selectedHero.blue;
+            slotRange = [11, 15];
+        } else if (activeBoxId.startsWith('ban-right')) {
+            pendingImgSrc = selectedHero.red;
+            slotRange = [16, 20];
+        } else if (activeBoxId.startsWith('pick-left')) {
+            pendingImgSrc = selectedHero.blue;
+            slotRange = [1, 5];
+        } else if (activeBoxId.startsWith('pick-right')) {
+            pendingImgSrc = selectedHero.red;
+            slotRange = [6, 10];
+        }
+
+        if (pendingImgSrc && slotRange) {
+            // Show dimmed preview on the first empty slot in range
+            for (let i = slotRange[0]; i <= slotRange[1]; i++) {
+                if (!map[i]) {
+                    const img = document.getElementById(`image-display-${i}`);
+                    const box = document.getElementById(`image-box-${i}`);
+                    if (img && box && !box.classList.contains('show')) {
+                        if (!img.src.endsWith(pendingImgSrc)) {
+                            img.src = pendingImgSrc;
+                        }
+                        box.classList.add('pending');
+                    }
+                    break;
                 }
             }
         }

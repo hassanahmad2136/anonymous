@@ -33,6 +33,10 @@ app.get('/health', (req, res) => res.json({ status: 'ok', version: '4.8.0' }));
 // Root redirect → admin panel
 app.get('/', (req, res) => res.redirect('/admin.html'));
 
+// Heavy assets — cache for 7 days (hero images, fonts, sounds)
+app.use('/Assets', express.static(path.join(__dirname, 'public/Assets'), { maxAge: '7d', etag: true }));
+app.use('/database/herolist.json', express.static(path.join(__dirname, 'public/database/herolist.json'), { maxAge: '1d' }));
+
 // Serve draft public files first (admin.html, captain.html)
 app.use(express.static(path.join(__dirname, 'draft/public')));
 // Then main overlay public files
@@ -291,6 +295,7 @@ function syncDraftToOverlay() {
             timer: String(draft.timer),
             timer_running: draft.timerRunning,
             current_phase: draft.currentPhase,
+            selected_hero: draft.selectedHero,
             blueside: {
                 ban:  draft.blueside.ban.map(h  => ({ hero: h||'' })),
                 pick: draft.blueside.pick.map(h => ({ hero: h||'' }))
@@ -360,8 +365,15 @@ function lockHero(side, heroImg) {
     draft.picksInPhase++;
     broadcastDraftState();
     syncDraftToOverlay();
-    if (draft.picksInPhase >= phase.count) advancePhase();
-    else draft.timer = TIMER_DURATION;
+    if (draft.picksInPhase >= phase.count) {
+        advancePhase();
+    } else {
+        // Double-pick: timer continues from where it is.
+        // Give at least 8 seconds for the second pick if time is almost gone.
+        if (draft.timer < 8) draft.timer = 8;
+        broadcastDraftState();
+        syncDraftToOverlay();
+    }
 }
 
 function advancePhase() {
@@ -577,6 +589,7 @@ app.post('/api/draft/select/:hash', (req, res) => {
     if (getAllUsedHeroes().includes(req.body.hero)) return res.status(400).json({ error:'Already used' });
     draft.selectedHero[side] = req.body.hero;
     broadcastDraftState();
+    syncDraftToOverlay(); // push pending preview to OBS overlay
     res.json({ message:'Selected' });
 });
 

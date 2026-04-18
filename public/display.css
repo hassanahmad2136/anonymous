@@ -680,3 +680,30 @@ body {
     background-color: var(--primarycolor);
     z-index: 1;
 }
+
+/* Dimmed pending preview — hero selected but not yet locked */
+.image-box.pending img {
+    opacity: 0.42 !important;
+    transform: translateY(0) !important;
+    filter: brightness(0.6) saturate(0.35) !important;
+    transition: opacity 0.25s ease !important;
+}
+
+/* Subtle pulsing border on the pick/ban slot when pending */
+.pickb1.pending-slot, .pickb2.pending-slot, .pickb3.pending-slot,
+.pickb4.pending-slot, .pickb5.pending-slot,
+.pickr1.pending-slot, .pickr2.pending-slot, .pickr3.pending-slot,
+.pickr4.pending-slot, .pickr5.pending-slot {
+    outline: 2px dashed rgba(255, 200, 0, 0.55);
+    outline-offset: -2px;
+    animation: pendingPulse 1.2s ease-in-out infinite alternate;
+}
+.ban.pending-slot {
+    outline: 2px dashed rgba(255, 100, 100, 0.55);
+    outline-offset: -2px;
+    animation: pendingPulse 1.2s ease-in-out infinite alternate;
+}
+@keyframes pendingPulse {
+    0%   { outline-color: rgba(255, 200, 0, 0.3); }
+    100% { outline-color: rgba(255, 200, 0, 0.8); }
+}
