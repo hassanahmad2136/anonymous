@@ -36,6 +36,9 @@ app.get('/', (req, res) => res.redirect('/admin.html'));
 // Heavy assets — cache for 7 days (hero images, fonts, sounds)
 app.use('/Assets', express.static(path.join(__dirname, 'public/Assets'), { maxAge: '7d', etag: true }));
 app.use('/database/herolist.json', express.static(path.join(__dirname, 'public/database/herolist.json'), { maxAge: '1d' }));
+// Serve user-uploaded files from persistent volume
+app.use('/Assets/costum/Theme', express.static(unifiedDir));
+app.use('/Assets/nationalflag', express.static(flagDir));
 
 // Serve draft public files first (admin.html, captain.html)
 app.use(express.static(path.join(__dirname, 'draft/public')));
@@ -57,11 +60,14 @@ const fileQueue = new AsyncQueue();
 // ============================================================
 // PATHS & FOLDERS
 // ============================================================
-const dbDir        = path.join(__dirname, 'public/database');
+// Use /data (Railway persistent volume) when available, otherwise fall back to __dirname
+const DATA_ROOT    = fsSync.existsSync('/data') ? '/data' : __dirname;
+
+const dbDir        = path.join(DATA_ROOT, 'database');
 const savedMatchDir= path.join(dbDir, 'savedmatch');
-const unifiedDir   = path.join(__dirname, 'public/Assets/costum/Theme');
-const flagDir      = path.join(__dirname, 'public/Assets/nationalflag');
-const draftDbPath  = path.join(__dirname, 'draft/tournament_db.json');
+const unifiedDir   = path.join(DATA_ROOT, 'theme');
+const flagDir      = path.join(DATA_ROOT, 'nationalflag');
+const draftDbPath  = path.join(DATA_ROOT, 'tournament_db.json');
 
 [dbDir, savedMatchDir, unifiedDir, flagDir].forEach(d => {
     if (!fsSync.existsSync(d)) fsSync.mkdirSync(d, { recursive: true });
