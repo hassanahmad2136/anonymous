@@ -36,9 +36,6 @@ app.get('/', (req, res) => res.redirect('/admin.html'));
 // Heavy assets — cache for 7 days (hero images, fonts, sounds)
 app.use('/Assets', express.static(path.join(__dirname, 'public/Assets'), { maxAge: '7d', etag: true }));
 app.use('/database/herolist.json', express.static(path.join(__dirname, 'public/database/herolist.json'), { maxAge: '1d' }));
-// Serve user-uploaded files from persistent volume
-app.use('/Assets/costum/Theme', express.static(unifiedDir));
-app.use('/Assets/nationalflag', express.static(flagDir));
 
 // Serve draft public files first (admin.html, captain.html)
 app.use(express.static(path.join(__dirname, 'draft/public')));
@@ -72,6 +69,10 @@ const draftDbPath  = path.join(DATA_ROOT, 'tournament_db.json');
 [dbDir, savedMatchDir, unifiedDir, flagDir].forEach(d => {
     if (!fsSync.existsSync(d)) fsSync.mkdirSync(d, { recursive: true });
 });
+
+// Serve user-uploaded files from persistent volume (must be after path vars are defined)
+app.use('/Assets/costum/Theme', express.static(unifiedDir));
+app.use('/Assets/nationalflag', express.static(flagDir));
 
 const matchDataPath     = path.join(dbDir, 'matchdatateam.json');
 const draftDataPath     = path.join(dbDir, 'matchdraft.json');
